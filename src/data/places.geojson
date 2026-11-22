@@ -1,0 +1,1477 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "way/70606031",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06256,
+              -11.99791
+            ],
+            [
+              -77.06241,
+              -11.99889
+            ],
+            [
+              -77.06217,
+              -12.00041
+            ],
+            [
+              -77.06211,
+              -12.00076
+            ],
+            [
+              -77.062,
+              -12.00074
+            ],
+            [
+              -77.06104,
+              -12.0006
+            ],
+            [
+              -77.0599,
+              -12.00043
+            ],
+            [
+              -77.06,
+              -11.99981
+            ],
+            [
+              -77.05921,
+              -11.99968
+            ],
+            [
+              -77.05911,
+              -12.00032
+            ],
+            [
+              -77.05855,
+              -12.00023
+            ],
+            [
+              -77.0586,
+              -11.99994
+            ],
+            [
+              -77.05825,
+              -11.99989
+            ],
+            [
+              -77.05831,
+              -11.99951
+            ],
+            [
+              -77.0585,
+              -11.99828
+            ],
+            [
+              -77.05865,
+              -11.99732
+            ],
+            [
+              -77.06256,
+              -11.99791
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/70606031",
+        "category": "education",
+        "kind": "amenity=college",
+        "geometryType": "area",
+        "labelLng": -77.06084,
+        "labelLat": -11.99904,
+        "name": "SENATI Sede Principal"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/70650578",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06343,
+              -12.00135
+            ],
+            [
+              -77.06325,
+              -12.00248
+            ],
+            [
+              -77.06285,
+              -12.00242
+            ],
+            [
+              -77.06303,
+              -12.00129
+            ],
+            [
+              -77.06343,
+              -12.00135
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/70650578",
+        "category": "park",
+        "kind": "leisure=park",
+        "geometryType": "area",
+        "labelLng": -77.06314,
+        "labelLat": -12.00188
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/396491706",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.0618,
+              -12.00156
+            ],
+            [
+              -77.06174,
+              -12.00197
+            ],
+            [
+              -77.06079,
+              -12.00184
+            ],
+            [
+              -77.06085,
+              -12.00142
+            ],
+            [
+              -77.0618,
+              -12.00156
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/396491706",
+        "category": "shop",
+        "kind": "shop=furniture",
+        "geometryType": "building",
+        "labelLng": -77.06129,
+        "labelLat": -12.0017,
+        "heightM": 6
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/438468514",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.0618,
+              -12.00156
+            ],
+            [
+              -77.06085,
+              -12.00142
+            ],
+            [
+              -77.06074,
+              -12.00141
+            ],
+            [
+              -77.06066,
+              -12.0014
+            ],
+            [
+              -77.06073,
+              -12.00086
+            ],
+            [
+              -77.06205,
+              -12.00104
+            ],
+            [
+              -77.06197,
+              -12.00158
+            ],
+            [
+              -77.0618,
+              -12.00156
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/438468514",
+        "category": "shop",
+        "kind": "shop=furniture",
+        "geometryType": "building",
+        "labelLng": -77.06135,
+        "labelLat": -12.00122,
+        "name": "Royal Home",
+        "heightM": 6
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/440244416",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06108,
+              -11.99613
+            ],
+            [
+              -77.06107,
+              -11.99619
+            ],
+            [
+              -77.06104,
+              -11.99636
+            ],
+            [
+              -77.06102,
+              -11.99649
+            ],
+            [
+              -77.061,
+              -11.99665
+            ],
+            [
+              -77.06095,
+              -11.99701
+            ],
+            [
+              -77.06077,
+              -11.99699
+            ],
+            [
+              -77.06073,
+              -11.99698
+            ],
+            [
+              -77.06078,
+              -11.99662
+            ],
+            [
+              -77.06085,
+              -11.99616
+            ],
+            [
+              -77.06087,
+              -11.99606
+            ],
+            [
+              -77.06092,
+              -11.99608
+            ],
+            [
+              -77.06108,
+              -11.99613
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/440244416",
+        "category": "education",
+        "kind": "amenity=college",
+        "geometryType": "area",
+        "labelLng": -77.0609,
+        "labelLat": -11.99654,
+        "name": "Zegel"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/440258362",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06378,
+              -11.99791
+            ],
+            [
+              -77.06373,
+              -11.99821
+            ],
+            [
+              -77.06333,
+              -11.99815
+            ],
+            [
+              -77.06338,
+              -11.99785
+            ],
+            [
+              -77.06378,
+              -11.99791
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/440258362",
+        "category": "sport",
+        "kind": "leisure=pitch",
+        "geometryType": "area",
+        "labelLng": -77.06355,
+        "labelLat": -11.99803
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/440258367",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06206,
+              -11.99952
+            ],
+            [
+              -77.06202,
+              -11.99979
+            ],
+            [
+              -77.06175,
+              -11.99975
+            ],
+            [
+              -77.06179,
+              -11.99948
+            ],
+            [
+              -77.06206,
+              -11.99952
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/440258367",
+        "category": "education",
+        "kind": "office=educational_institution",
+        "geometryType": "building",
+        "labelLng": -77.0619,
+        "labelLat": -11.99963,
+        "name": "Direccion Zonal Lima Callao",
+        "levels": 2,
+        "heightM": 6.4
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/440258368",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06143,
+              -11.99936
+            ],
+            [
+              -77.06137,
+              -11.99978
+            ],
+            [
+              -77.06135,
+              -11.99989
+            ],
+            [
+              -77.06108,
+              -11.99985
+            ],
+            [
+              -77.06117,
+              -11.99932
+            ],
+            [
+              -77.06143,
+              -11.99936
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/440258368",
+        "category": "food",
+        "kind": "amenity=fast_food",
+        "geometryType": "building",
+        "labelLng": -77.06126,
+        "labelLat": -11.9996,
+        "name": "Comedor",
+        "levels": 1,
+        "heightM": 4
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/440258377",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06169,
+              -12.00009
+            ],
+            [
+              -77.06168,
+              -12.00014
+            ],
+            [
+              -77.06168,
+              -12.00016
+            ],
+            [
+              -77.0617,
+              -12.00017
+            ],
+            [
+              -77.06169,
+              -12.0002
+            ],
+            [
+              -77.06169,
+              -12.00022
+            ],
+            [
+              -77.06171,
+              -12.00023
+            ],
+            [
+              -77.06171,
+              -12.00025
+            ],
+            [
+              -77.06169,
+              -12.00024
+            ],
+            [
+              -77.06168,
+              -12.00028
+            ],
+            [
+              -77.06167,
+              -12.00033
+            ],
+            [
+              -77.06165,
+              -12.00032
+            ],
+            [
+              -77.06164,
+              -12.00038
+            ],
+            [
+              -77.06157,
+              -12.00037
+            ],
+            [
+              -77.06157,
+              -12.00042
+            ],
+            [
+              -77.0612,
+              -12.00037
+            ],
+            [
+              -77.06121,
+              -12.00032
+            ],
+            [
+              -77.06121,
+              -12.00031
+            ],
+            [
+              -77.06121,
+              -12.00031
+            ],
+            [
+              -77.06122,
+              -12.00025
+            ],
+            [
+              -77.0612,
+              -12.00025
+            ],
+            [
+              -77.06121,
+              -12.0002
+            ],
+            [
+              -77.06121,
+              -12.00016
+            ],
+            [
+              -77.06123,
+              -12.00016
+            ],
+            [
+              -77.06123,
+              -12.00014
+            ],
+            [
+              -77.0613,
+              -12.00015
+            ],
+            [
+              -77.06131,
+              -12.00009
+            ],
+            [
+              -77.06131,
+              -12.00009
+            ],
+            [
+              -77.06132,
+              -12.00005
+            ],
+            [
+              -77.06132,
+              -12.00003
+            ],
+            [
+              -77.06169,
+              -12.00009
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/440258377",
+        "category": "education",
+        "kind": "office=educational_institution",
+        "geometryType": "building",
+        "labelLng": -77.06145,
+        "labelLat": -12.00023,
+        "name": "Direccion Nacional",
+        "levels": 8,
+        "heightM": 25.6
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/488378904",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06111,
+              -11.99905
+            ],
+            [
+              -77.06098,
+              -11.99988
+            ],
+            [
+              -77.06038,
+              -11.99979
+            ],
+            [
+              -77.06045,
+              -11.99933
+            ],
+            [
+              -77.06051,
+              -11.99896
+            ],
+            [
+              -77.06111,
+              -11.99905
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/488378904",
+        "category": "sport",
+        "kind": "leisure=pitch",
+        "geometryType": "area",
+        "labelLng": -77.06074,
+        "labelLat": -11.99942,
+        "name": "Campo deportivo de futbol"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/488378905",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06098,
+              -11.99877
+            ],
+            [
+              -77.06094,
+              -11.999
+            ],
+            [
+              -77.06057,
+              -11.99894
+            ],
+            [
+              -77.06061,
+              -11.99871
+            ],
+            [
+              -77.06098,
+              -11.99877
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/488378905",
+        "category": "sport",
+        "kind": "leisure=pitch",
+        "geometryType": "area",
+        "labelLng": -77.06077,
+        "labelLat": -11.99885,
+        "name": "Campo deportivo"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/662644623",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06152,
+              -11.9988
+            ],
+            [
+              -77.06144,
+              -11.99932
+            ],
+            [
+              -77.0611,
+              -11.99927
+            ],
+            [
+              -77.06119,
+              -11.99875
+            ],
+            [
+              -77.06152,
+              -11.9988
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/662644623",
+        "category": "park",
+        "kind": "leisure=park",
+        "geometryType": "area",
+        "labelLng": -77.06131,
+        "labelLat": -11.99903
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/689376697",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06203,
+              -11.99851
+            ],
+            [
+              -77.06198,
+              -11.99877
+            ],
+            [
+              -77.06155,
+              -11.99871
+            ],
+            [
+              -77.06159,
+              -11.99844
+            ],
+            [
+              -77.06203,
+              -11.99851
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/689376697",
+        "category": "park",
+        "kind": "leisure=park",
+        "geometryType": "area",
+        "labelLng": -77.06179,
+        "labelLat": -11.99861
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/808631324",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06238,
+              -11.99661
+            ],
+            [
+              -77.06235,
+              -11.99669
+            ],
+            [
+              -77.06274,
+              -11.99681
+            ],
+            [
+              -77.06274,
+              -11.99688
+            ],
+            [
+              -77.06265,
+              -11.99693
+            ],
+            [
+              -77.06255,
+              -11.9975
+            ],
+            [
+              -77.0626,
+              -11.99755
+            ],
+            [
+              -77.06259,
+              -11.99774
+            ],
+            [
+              -77.06195,
+              -11.99764
+            ],
+            [
+              -77.06209,
+              -11.99674
+            ],
+            [
+              -77.06213,
+              -11.99654
+            ],
+            [
+              -77.06238,
+              -11.99661
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/808631324",
+        "category": "fuel",
+        "kind": "amenity=fuel",
+        "geometryType": "area",
+        "labelLng": -77.06232,
+        "labelLat": -11.99718,
+        "name": "PRIMAX"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/808969917",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.05807,
+              -11.99881
+            ],
+            [
+              -77.05776,
+              -11.99876
+            ],
+            [
+              -77.05782,
+              -11.99836
+            ],
+            [
+              -77.05814,
+              -11.99841
+            ],
+            [
+              -77.05807,
+              -11.99881
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/808969917",
+        "category": "shop",
+        "kind": "shop=car_repair",
+        "geometryType": "building",
+        "labelLng": -77.05795,
+        "labelLat": -11.99859,
+        "name": "Mega Autos",
+        "heightM": 5
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/835576775",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.05797,
+              -12.0017
+            ],
+            [
+              -77.0583,
+              -12.00175
+            ],
+            [
+              -77.05827,
+              -12.00194
+            ],
+            [
+              -77.05799,
+              -12.00189
+            ],
+            [
+              -77.05796,
+              -12.00184
+            ],
+            [
+              -77.05794,
+              -12.00183
+            ],
+            [
+              -77.05797,
+              -12.0017
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/835576775",
+        "category": "market",
+        "kind": "amenity=marketplace",
+        "geometryType": "area",
+        "labelLng": -77.05812,
+        "labelLat": -12.00182,
+        "name": "Mercado Mesa Redonda"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1461948202",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06095,
+              -11.99692
+            ],
+            [
+              -77.06094,
+              -11.997
+            ],
+            [
+              -77.06075,
+              -11.99697
+            ],
+            [
+              -77.06076,
+              -11.99689
+            ],
+            [
+              -77.06095,
+              -11.99692
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/1461948202",
+        "category": "sport",
+        "kind": "leisure=pitch",
+        "geometryType": "area",
+        "labelLng": -77.06085,
+        "labelLat": -11.99694
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1574776082",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.0618,
+              -11.99931
+            ],
+            [
+              -77.06187,
+              -11.99885
+            ],
+            [
+              -77.06237,
+              -11.99893
+            ],
+            [
+              -77.0623,
+              -11.99939
+            ],
+            [
+              -77.0618,
+              -11.99931
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/1574776082",
+        "category": "parking",
+        "kind": "amenity=parking",
+        "geometryType": "area",
+        "labelLng": -77.06208,
+        "labelLat": -11.99912
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1575107311",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06113,
+              -11.99879
+            ],
+            [
+              -77.06109,
+              -11.99902
+            ],
+            [
+              -77.06097,
+              -11.999
+            ],
+            [
+              -77.061,
+              -11.99877
+            ],
+            [
+              -77.06113,
+              -11.99879
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/1575107311",
+        "category": "sport",
+        "kind": "leisure=pitch",
+        "geometryType": "area",
+        "labelLng": -77.06105,
+        "labelLat": -11.9989,
+        "name": "Campo deportivo"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1575107313",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06209,
+              -12.00032
+            ],
+            [
+              -77.06206,
+              -12.00045
+            ],
+            [
+              -77.06214,
+              -12.00046
+            ],
+            [
+              -77.06209,
+              -12.00073
+            ],
+            [
+              -77.0618,
+              -12.00068
+            ],
+            [
+              -77.06187,
+              -12.00028
+            ],
+            [
+              -77.06209,
+              -12.00032
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/1575107313",
+        "category": "parking",
+        "kind": "amenity=parking",
+        "geometryType": "area",
+        "labelLng": -77.06197,
+        "labelLat": -12.00056
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1577121432",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06077,
+              -12.00021
+            ],
+            [
+              -77.06078,
+              -12.00013
+            ],
+            [
+              -77.06093,
+              -12.00015
+            ],
+            [
+              -77.06091,
+              -12.00023
+            ],
+            [
+              -77.06077,
+              -12.00021
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/1577121432",
+        "category": "food",
+        "kind": "amenity=cafe",
+        "geometryType": "building",
+        "labelLng": -77.06085,
+        "labelLat": -12.00018,
+        "name": "Cafetería SENATI",
+        "levels": 1,
+        "heightM": 4
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1579956010",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -77.06007,
+              -12.00015
+            ],
+            [
+              -77.06006,
+              -12.00025
+            ],
+            [
+              -77.05998,
+              -12.00024
+            ],
+            [
+              -77.05997,
+              -12.00023
+            ],
+            [
+              -77.05997,
+              -12.00021
+            ],
+            [
+              -77.05997,
+              -12.0002
+            ],
+            [
+              -77.05997,
+              -12.00017
+            ],
+            [
+              -77.05998,
+              -12.00016
+            ],
+            [
+              -77.05999,
+              -12.00015
+            ],
+            [
+              -77.06,
+              -12.00014
+            ],
+            [
+              -77.06007,
+              -12.00015
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "way/1579956010",
+        "category": "park",
+        "kind": "leisure=garden",
+        "geometryType": "area",
+        "labelLng": -77.06002,
+        "labelLat": -12.00019
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/1863374473",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06262,
+          -11.99663
+        ]
+      },
+      "properties": {
+        "id": "node/1863374473",
+        "category": "finance",
+        "kind": "amenity=bank",
+        "geometryType": "point",
+        "labelLng": -77.06262,
+        "labelLat": -11.99663,
+        "name": "Banco de la Nación"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/4379685965",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06175,
+          -11.99658
+        ]
+      },
+      "properties": {
+        "id": "node/4379685965",
+        "category": "shop",
+        "kind": "shop=car_parts",
+        "geometryType": "point",
+        "labelLng": -77.06175,
+        "labelLat": -11.99658,
+        "name": "ETNA"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/4379685966",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06237,
+          -11.99656
+        ]
+      },
+      "properties": {
+        "id": "node/4379685966",
+        "category": "shop",
+        "kind": "shop=cosmetics",
+        "geometryType": "point",
+        "labelLng": -77.06237,
+        "labelLat": -11.99656,
+        "name": "Unique"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/4379812240",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06349,
+          -11.99718
+        ]
+      },
+      "properties": {
+        "id": "node/4379812240",
+        "category": "shop",
+        "kind": "shop=car_parts",
+        "geometryType": "point",
+        "labelLng": -77.06349,
+        "labelLat": -11.99718,
+        "name": "Battery Plaza"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/4379812275",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06332,
+          -11.99771
+        ]
+      },
+      "properties": {
+        "id": "node/4379812275",
+        "category": "worship",
+        "kind": "amenity=place_of_worship",
+        "geometryType": "point",
+        "labelLng": -77.06332,
+        "labelLat": -11.99771,
+        "name": "Parroquia EL Buen Pastor"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/4379812276",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06312,
+          -11.99832
+        ]
+      },
+      "properties": {
+        "id": "node/4379812276",
+        "category": "education",
+        "kind": "amenity=university",
+        "geometryType": "point",
+        "labelLng": -77.06312,
+        "labelLat": -11.99832,
+        "name": "Universidad Católica Sede Sapientiae"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/5577057586",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06261,
+          -12.00154
+        ]
+      },
+      "properties": {
+        "id": "node/5577057586",
+        "category": "education",
+        "kind": "amenity=kindergarten",
+        "geometryType": "point",
+        "labelLng": -77.06261,
+        "labelLat": -12.00154,
+        "name": "Institución educativa inicial Querubines Del Divina Misericordia"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/5577057587",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06331,
+          -11.99949
+        ]
+      },
+      "properties": {
+        "id": "node/5577057587",
+        "category": "education",
+        "kind": "amenity=kindergarten",
+        "geometryType": "point",
+        "labelLng": -77.06331,
+        "labelLat": -11.99949,
+        "name": "Institución educativa inicial El Carmelo"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/5577057588",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.05826,
+          -12.0001
+        ]
+      },
+      "properties": {
+        "id": "node/5577057588",
+        "category": "education",
+        "kind": "amenity=kindergarten",
+        "geometryType": "point",
+        "labelLng": -77.05826,
+        "labelLat": -12.0001,
+        "name": "Institución educativa inicial Amigos En Jesus"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/5577057589",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.0631,
+          -11.99922
+        ]
+      },
+      "properties": {
+        "id": "node/5577057589",
+        "category": "education",
+        "kind": "amenity=school",
+        "geometryType": "point",
+        "labelLng": -77.0631,
+        "labelLat": -11.99922,
+        "name": "Institución Educativa El Carmelo"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/5577057590",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06328,
+          -11.99916
+        ]
+      },
+      "properties": {
+        "id": "node/5577057590",
+        "category": "education",
+        "kind": "amenity=school",
+        "geometryType": "point",
+        "labelLng": -77.06328,
+        "labelLat": -11.99916,
+        "name": "Institución Educativa Cristo Morado"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/5577057591",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06341,
+          -12.00049
+        ]
+      },
+      "properties": {
+        "id": "node/5577057591",
+        "category": "education",
+        "kind": "amenity=kindergarten",
+        "geometryType": "point",
+        "labelLng": -77.06341,
+        "labelLat": -12.00049,
+        "name": "Institución educativa inicial Despertar"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/9406636346",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06277,
+          -12.00018
+        ]
+      },
+      "properties": {
+        "id": "node/9406636346",
+        "category": "shop",
+        "kind": "shop=clothes",
+        "geometryType": "point",
+        "labelLng": -77.06277,
+        "labelLat": -12.00018
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/14361385759",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06173,
+          -11.99859
+        ]
+      },
+      "properties": {
+        "id": "node/14361385759",
+        "category": "art",
+        "kind": "tourism=artwork",
+        "geometryType": "point",
+        "labelLng": -77.06173,
+        "labelLat": -11.99859
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/14361385760",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.06209,
+          -11.99887
+        ]
+      },
+      "properties": {
+        "id": "node/14361385760",
+        "category": "art",
+        "kind": "tourism=artwork",
+        "geometryType": "point",
+        "labelLng": -77.06209,
+        "labelLat": -11.99887,
+        "name": "Alejandro Tabini"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "node/14383648668",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.0616,
+          -11.99941
+        ]
+      },
+      "properties": {
+        "id": "node/14383648668",
+        "category": "art",
+        "kind": "tourism=artwork",
+        "geometryType": "point",
+        "labelLng": -77.0616,
+        "labelLat": -11.99941,
+        "name": "Escultura del SENATI"
+      }
+    }
+  ]
+}

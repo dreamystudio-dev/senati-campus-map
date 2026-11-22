@@ -1,0 +1,91 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API",
+  "elements": [
+    {
+      "type": "way",
+      "id": 100,
+      "tags": {
+        "building": "yes",
+        "building:levels": "2",
+        "name": "Pabellón A",
+        "amenity": "college"
+      },
+      "geometry": [
+        { "lat": -11.999, "lon": -77.060 },
+        { "lat": -11.999, "lon": -77.059 },
+        { "lat": -11.998, "lon": -77.059 },
+        { "lat": -11.998, "lon": -77.060 },
+        { "lat": -11.999, "lon": -77.060 }
+      ]
+    },
+    {
+      "type": "way",
+      "id": 200,
+      "tags": {
+        "leisure": "park"
+      },
+      "geometry": [
+        { "lat": -11.997, "lon": -77.062 },
+        { "lat": -11.997, "lon": -77.061 },
+        { "lat": -11.996, "lon": -77.061 },
+        { "lat": -11.996, "lon": -77.062 },
+        { "lat": -11.997, "lon": -77.062 }
+      ]
+    },
+    {
+      "type": "relation",
+      "id": 700,
+      "tags": {
+        "type": "multipolygon",
+        "leisure": "park"
+      },
+      "members": [
+        {
+          "type": "way",
+          "ref": 701,
+          "role": "outer",
+          "geometry": [
+            { "lat": -12.000, "lon": -77.063 },
+            { "lat": -12.000, "lon": -77.062 },
+            { "lat": -11.999, "lon": -77.062 },
+            { "lat": -11.999, "lon": -77.063 },
+            { "lat": -12.000, "lon": -77.063 }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "node",
+      "id": 900,
+      "lat": -11.9985,
+      "lon": -77.0605,
+      "tags": {
+        "shop": "convenience",
+        "name": "Bodega Don Pepe"
+      }
+    },
+    {
+      "type": "way",
+      "id": 300,
+      "tags": {
+        "landuse": "grass"
+      },
+      "geometry": [
+        { "lat": -11.999, "lon": -77.061 },
+        { "lat": -11.999, "lon": -77.060 },
+        { "lat": -11.998, "lon": -77.060 },
+        { "lat": -11.999, "lon": -77.061 }
+      ]
+    },
+    {
+      "type": "node",
+      "id": 400,
+      "lat": -11.998,
+      "lon": -77.061,
+      "tags": {
+        "amenity": "recycling"
+      }
+    }
+  ]
+}
