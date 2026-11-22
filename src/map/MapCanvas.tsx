@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, useImperativeHandle, forwardRef, useCallba
 import type { Map } from 'maplibre-gl'
 import { createMap, webglAvailable } from './createMap'
 import { fitCampus } from './options'
-import { useTopView } from '../camera/useTopView'
 import { useAppStore } from '../store'
 import { LoadingOverlay } from '../ui/LoadingOverlay'
 import { ErrorOverlay } from '../ui/ErrorOverlay'
@@ -21,8 +20,6 @@ export const MapCanvas = forwardRef<MapCanvasHandle>(function MapCanvas(_props, 
   useImperativeHandle(ref, () => ({
     getMap: () => mapInstance,
   }))
-
-  useTopView(mapInstance)
 
   const handleRetry = useCallback(() => {
     setMapStatus('loading')
@@ -49,6 +46,11 @@ export const MapCanvas = forwardRef<MapCanvasHandle>(function MapCanvas(_props, 
         }
         currentMap = map
         setMapInstance(map)
+        if (map.isStyleLoaded()) {
+          fitCampus(map)
+        } else {
+          map.once('load', () => fitCampus(map))
+        }
       })
       .catch((err) => {
         if (!isCancelled) {
@@ -60,9 +62,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle>(function MapCanvas(_props, 
     const resizeObserver = new ResizeObserver(() => {
       if (!currentMap) return
       currentMap.resize()
-      if (useAppStore.getState().mode === 'top') {
-        fitCampus(currentMap)
-      }
+      fitCampus(currentMap)
     })
 
     resizeObserver.observe(containerRef.current)

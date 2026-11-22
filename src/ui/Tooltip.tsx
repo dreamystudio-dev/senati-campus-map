@@ -5,10 +5,8 @@ import placesData from '../data/places.geojson'
 export function Tooltip() {
   const hoveredId = useAppStore((state) => state.hoveredId)
   const hoverPosition = useAppStore((state) => state.hoverPosition)
-  const mode = useAppStore((state) => state.mode)
-  const locked = useAppStore((state) => state.locked)
 
-  if (!hoveredId || !hoverPosition || (mode === 'free' && locked)) {
+  if (!hoveredId || !hoverPosition) {
     return null
   }
 

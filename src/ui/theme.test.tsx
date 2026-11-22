@@ -3,7 +3,7 @@ import { ControlsCard } from './ControlsCard'
 import { useAppStore } from '../store'
 
 it('uses the shared theme tokens for the panel chrome', () => {
-  useAppStore.setState({ mode: 'top', locked: false, lockRefused: false })
+  useAppStore.setState({ mapStatus: 'loading' })
   render(<ControlsCard />)
   const card = screen.getByTestId('controls-card')
 

@@ -5,10 +5,6 @@ import { useAppStore } from '../store'
 
 beforeEach(() => {
   useAppStore.setState({
-    mode: 'top',
-    locked: false,
-    lockRefused: false,
-    transitioning: false,
     selectedId: null,
     hoveredId: null,
     hoverPosition: null,

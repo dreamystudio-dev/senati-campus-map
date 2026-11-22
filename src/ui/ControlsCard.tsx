@@ -1,13 +1,8 @@
-import { useAppStore } from '../store'
 import { THEME } from '../theme'
 import { controlsFor } from './copy'
 
 export function ControlsCard() {
-  const mode = useAppStore((state) => state.mode)
-  const locked = useAppStore((state) => state.locked)
-  const lockRefused = useAppStore((state) => state.lockRefused)
-
-  const controls = controlsFor(mode, locked, lockRefused)
+  const controls = controlsFor()
 
   return (
     <div
@@ -16,7 +11,7 @@ export function ControlsCard() {
       style={{ backgroundColor: THEME.panel, borderColor: THEME.panelBorder }}
     >
       <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">
-        Controls · {mode === 'top' ? 'Top View' : 'Free View'}
+        Controls · Campus map
       </div>
       <ul className="space-y-1 text-xs text-gray-200">
         {controls.map((hint, idx) => (
