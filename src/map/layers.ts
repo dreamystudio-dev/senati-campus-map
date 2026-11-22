@@ -168,6 +168,20 @@ export function placesLayers(): LayerSpecification[] {
       },
     },
     {
+      id: 'places-hover-point',
+      type: 'circle',
+      source: HOVER_SOURCE_ID,
+      filter: geometryIs('point') as FilterSpecification,
+      paint: {
+        'circle-color': '#ffffff',
+        'circle-opacity': 0.35,
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 15.5, 8, 19.5, 10],
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 2,
+        'circle-pitch-alignment': 'viewport',
+      },
+    },
+    {
       id: 'places-labels',
       type: 'symbol',
       source: PLACES_SOURCE_ID,

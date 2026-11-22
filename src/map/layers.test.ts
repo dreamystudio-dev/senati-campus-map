@@ -12,6 +12,7 @@ const LAYER_IDS = [
   'places-points',
   'places-hover-fill',
   'places-hover-line',
+  'places-hover-point',
   'places-labels',
 ]
 
@@ -63,4 +64,10 @@ it('adds a hover highlight above the place layers', () => {
   const ids = placesLayers().map((l) => l.id)
   expect(ids).toContain('places-hover-fill')
   expect(ids).toContain('places-hover-line')
+})
+
+it('highlights hovered points with a circle layer', () => {
+  const layer = placesLayers().find((l) => l.id === 'places-hover-point')
+  expect(layer?.type).toBe('circle')
+  expect(JSON.stringify((layer as { filter?: unknown }).filter)).toContain('point')
 })

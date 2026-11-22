@@ -2,6 +2,8 @@ import { Map, AttributionControl, type StyleSpecification, type MapMouseEvent } 
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { FeatureCollection } from 'geojson'
 import { sanitizeStyle } from './style'
+import { isFatalMapError } from './errors'
+import { syncHoverSource } from './hover'
 import { PLACES_SOURCE_ID, HOVER_SOURCE_ID, placesLayers } from './layers'
 import placesData from '../data/places.geojson'
 import { useAppStore } from '../store'
@@ -55,10 +57,9 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     }
   })
 
-  // Watch for tile or style loading errors
-  map.on('error', (e: any) => {
-    // Check if error is related to missing tiles or critical failures
-    if (e?.error?.status === 404 || e?.error?.status === 500 || (!e?.sourceId && e?.error)) {
+  // Only a failed tile source leaves an empty basemap; glyph/sprite errors do not.
+  map.on('error', (e) => {
+    if (isFatalMapError(e)) {
       useAppStore.getState().setMapStatus('error', 'Basemap tiles or style failed to load.')
     }
   })
@@ -83,30 +84,9 @@ export async function createMap(container: HTMLElement): Promise<Map> {
       })
     }
 
-    // Keep hover source in sync with store
-    const updateHoverSource = (hoveredId: string | null) => {
-      const hoverSource = map.getSource(HOVER_SOURCE_ID) as any
-      if (!hoverSource) return
-      if (!hoveredId) {
-        hoverSource.setData({ type: 'FeatureCollection', features: [] })
-        return
-      }
-      const feature = (placesData as FeatureCollection).features.find(
-        (f) => f.properties?.id === hoveredId,
-      )
-      hoverSource.setData({
-        type: 'FeatureCollection',
-        features: feature ? [feature] : [],
-      })
-    }
-
-    let prevHoveredId = useAppStore.getState().hoveredId
-    useAppStore.subscribe((state) => {
-      if (state.hoveredId !== prevHoveredId) {
-        prevHoveredId = state.hoveredId
-        updateHoverSource(prevHoveredId)
-      }
-    })
+    // Keep hover source in sync with store, and stop when the map is removed.
+    const unsubscribeHover = syncHoverSource(map, placesData as FeatureCollection)
+    map.once('remove', unsubscribeHover)
 
     // Find the first symbol layer in the basemap to place our layers before (or add at top)
     const layers = map.getStyle().layers || []
