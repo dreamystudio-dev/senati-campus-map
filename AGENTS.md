@@ -8,8 +8,9 @@ A single-screen 3D landing page for the **SENATI Sede Principal** campus in San 
 Porres, Lima (plus code `2W2Q+89`). The map fills the viewport: no page scroll, two camera
 modes, and places coloured by category from OpenStreetMap data.
 
-**Current state:** Block 1 of `PLAN.md` is implemented — app shell, campus bounds, category
-table, and committed place data. Blocks 2–5 (map layers, camera, UI, deploy) are still to build.
+**Current state:** Blocks 1–2 of `PLAN.md` are implemented — app shell, bounds, categories,
+place data, map bootstrap, category layers, and hover/selection. Blocks 3–5 (camera, landing UI,
+deploy) are still to build.
 
 ## Read first
 
@@ -35,6 +36,7 @@ pnpm test         # Vitest
 pnpm typecheck    # tsc --noEmit
 pnpm build        # production bundle in dist/
 pnpm data         # refresh src/data/places.geojson from Overpass (needs network)
+pnpm data --from-file overpass.json   # transform a saved Overpass response offline
 ```
 
 `pnpm data` is the only command that touches the network beyond map tiles. Run it only when the
