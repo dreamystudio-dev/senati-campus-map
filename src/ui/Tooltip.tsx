@@ -20,7 +20,7 @@ export function Tooltip() {
   return (
     <div
       data-testid="tooltip"
-      className="pointer-events-none fixed z-40 transform -translate-x-1/2 -translate-y-full mb-3 px-2.5 py-1.5 rounded bg-[#12151b]/90 border border-white/10 text-xs shadow-lg backdrop-blur-sm"
+      className="pointer-events-none fixed z-40 transform -translate-x-1/2 -translate-y-full mb-3 px-2.5 py-1.5 rounded bg-[#12151b]/90 border border-white/10 text-xs shadow-lg reduce-blur"
       style={{
         left: `${hoverPosition.x}px`,
         top: `${hoverPosition.y - 10}px`,

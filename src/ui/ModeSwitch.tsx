@@ -22,7 +22,7 @@ export function ModeSwitch({ onSwitch }: ModeSwitchProps) {
     <div
       role="group"
       aria-label="Camera mode"
-      className="absolute top-6 right-6 z-30 flex items-center p-1 rounded-lg bg-[#12151b]/80 border border-white/15 backdrop-blur-md shadow-lg"
+      className="absolute top-6 right-6 z-30 flex items-center p-1 rounded-lg bg-[#12151b]/80 border border-white/15 shadow-lg reduce-blur"
     >
       <button
         type="button"

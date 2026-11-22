@@ -13,7 +13,7 @@ export function ErrorOverlay({ onRetry }: ErrorOverlayProps) {
   return (
     <div
       data-testid="error-overlay"
-      className="absolute inset-0 z-50 flex items-center justify-center bg-[#12151b]/95 p-6 backdrop-blur-md"
+      className="absolute inset-0 z-50 flex items-center justify-center bg-[#12151b]/95 p-6 reduce-blur"
       role="alert"
     >
       <div className="max-w-md w-full rounded-xl bg-[#1f242e] border border-red-500/30 p-6 text-center shadow-2xl">

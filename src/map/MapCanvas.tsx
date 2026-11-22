@@ -106,7 +106,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
         data-testid="map-canvas"
         tabIndex={0}
         aria-label="3D map of SENATI Sede Principal campus"
-        className="w-full h-full focus-visible:outline-none"
+        className="w-full h-full focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#5aa9e6]"
       />
       <LoadingOverlay />
       <ErrorOverlay onRetry={handleRetry} />
