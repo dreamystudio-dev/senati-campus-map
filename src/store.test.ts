@@ -16,3 +16,10 @@ it('clears selection when the mode changes', () => {
   useAppStore.getState().setMode('free')
   expect(useAppStore.getState().selectedId).toBeNull()
 })
+
+it('clears hover when the pointer locks', () => {
+  useAppStore.getState().setHovered('way/1', { x: 10, y: 20 })
+  useAppStore.getState().setLocked(true)
+  expect(useAppStore.getState().hoveredId).toBeNull()
+  expect(useAppStore.getState().hoverPosition).toBeNull()
+})

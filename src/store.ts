@@ -29,7 +29,12 @@ export const useAppStore = create<AppState>((set) => ({
       hoveredId: null,
     }),
 
-  setLocked: (locked) => set({ locked }),
+  setLocked: (locked) =>
+    set(
+      locked
+        ? { locked, hoveredId: null, hoverPosition: null }
+        : { locked },
+    ),
 
   setHovered: (id, position = null) =>
     set({

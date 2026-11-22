@@ -50,13 +50,9 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     attributionControl: false,
   })
 
-  map.addControl(
-    new AttributionControl({
-      compact: false,
-      customAttribution:
-        '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a>',
-    }),
-  )
+  // The OpenFreeMap TileJSON already carries the required attribution.
+  // Adding customAttribution here would print it twice.
+  map.addControl(new AttributionControl({ compact: false }))
 
   map.on('load', () => {
     // Add places GeoJSON source
@@ -79,7 +75,9 @@ export async function createMap(container: HTMLElement): Promise<Map> {
 
     const interactiveLayerIds = [
       'places-buildings',
+      'places-buildings-outline-volume',
       'places-areas-fill',
+      'places-areas-outline-tint',
       'places-points',
     ]
 
@@ -112,6 +110,11 @@ export async function createMap(container: HTMLElement): Promise<Map> {
         map.getCanvas().style.cursor = ''
         state.setHovered(null)
       }
+    })
+
+    map.on('mouseout', () => {
+      map.getCanvas().style.cursor = ''
+      useAppStore.getState().setHovered(null)
     })
 
     // Click selection

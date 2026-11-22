@@ -9,7 +9,12 @@ interface MapCanvasProps {
 export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<Map | null>(null)
+  const onMapLoadedRef = useRef(onMapLoaded)
   const [error, setError] = useState<string | null>(null)
+
+  // Keep the latest callback without re-running the effect, which would
+  // tear down and rebuild the map on every parent render.
+  onMapLoadedRef.current = onMapLoaded
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -28,7 +33,7 @@ export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
           return
         }
         mapRef.current = map
-        onMapLoaded?.(map)
+        onMapLoadedRef.current?.(map)
       })
       .catch((err) => {
         if (!isCancelled) {
@@ -43,7 +48,7 @@ export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
         mapRef.current = null
       }
     }
-  }, [onMapLoaded])
+  }, [])
 
   return (
     <div className="relative w-full h-full">
