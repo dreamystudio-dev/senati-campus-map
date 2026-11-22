@@ -7,6 +7,7 @@ import { syncHoverSource } from './hover'
 import { PLACES_SOURCE_ID, HOVER_SOURCE_ID, placesLayers } from './layers'
 import placesData from '../data/places.geojson'
 import { useAppStore } from '../store'
+import { installInvertedRotation } from '../camera/invertRotation'
 import { mapOptions } from './options'
 
 export function webglAvailable(): boolean {
@@ -48,6 +49,9 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     ...opts,
     style,
   })
+
+  const uninstallRotation = installInvertedRotation(map)
+  map.once('remove', uninstallRotation)
 
   // Set map ready status on first idle
   map.once('idle', () => {
