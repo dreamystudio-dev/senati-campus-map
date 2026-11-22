@@ -3,6 +3,7 @@ import type { Map } from 'maplibre-gl'
 import { createMap, webglAvailable } from './createMap'
 import { fitCampus } from './options'
 import { useTopView } from '../camera/useTopView'
+import { useFreeView } from '../camera/useFreeView'
 import { useAppStore } from '../store'
 
 interface MapCanvasProps {
@@ -15,6 +16,7 @@ export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
   const [error, setError] = useState<string | null>(null)
 
   useTopView(mapInstance)
+  useFreeView(mapInstance, mapInstance ? mapInstance.getCanvas() : null)
 
   useEffect(() => {
     if (!containerRef.current) return
