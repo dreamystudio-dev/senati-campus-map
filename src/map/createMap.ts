@@ -6,6 +6,7 @@ import { PLACES_SOURCE_ID, placesLayers } from './layers'
 import placesData from '../data/places.geojson'
 import { useAppStore } from '../store'
 import { mapOptions } from './options'
+import { requestPointerLockSafe } from '../camera/transition'
 
 export function webglAvailable(): boolean {
   try {
@@ -40,13 +41,9 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     style,
   })
 
-  map.addControl(
-    new AttributionControl({
-      compact: false,
-      customAttribution:
-        '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a>',
-    }),
-  )
+  // The TileJSON already carries the OpenFreeMap/OSM attribution; adding a
+  // custom string here renders it twice.
+  map.addControl(new AttributionControl({ compact: false }))
 
   map.on('load', () => {
     // Add places GeoJSON source
@@ -69,7 +66,9 @@ export async function createMap(container: HTMLElement): Promise<Map> {
 
     const interactiveLayerIds = [
       'places-buildings',
+      'places-buildings-outline-volume',
       'places-areas-fill',
+      'places-areas-outline-tint',
       'places-points',
     ]
 
@@ -104,6 +103,11 @@ export async function createMap(container: HTMLElement): Promise<Map> {
       }
     })
 
+    map.on('mouseout', () => {
+      map.getCanvas().style.cursor = ''
+      useAppStore.getState().setHovered(null)
+    })
+
     // Click selection
     map.on('click', (e: MapMouseEvent) => {
       const state = useAppStore.getState()
@@ -118,8 +122,17 @@ export async function createMap(container: HTMLElement): Promise<Map> {
 
       if (features.length > 0 && features[0].properties?.id) {
         state.select(features[0].properties.id)
-      } else {
-        state.select(null)
+        return
+      }
+
+      state.select(null)
+      // Esc leaves free view unlocked: a click on empty canvas re-locks.
+      // Clicking a place still opens its info card instead.
+      if (state.mode === 'free' && !state.locked && !state.lockRefused) {
+        void requestPointerLockSafe(map.getCanvas()).then((granted) => {
+          state.setLocked(granted)
+          state.setLockRefused(!granted)
+        })
       }
     })
   })

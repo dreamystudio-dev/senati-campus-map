@@ -3,20 +3,27 @@ import type { Map } from 'maplibre-gl'
 import { useAppStore, type CameraMode } from '../store'
 import { transitionPlan, requestPointerLockSafe, FREE_VANTAGE } from './transition'
 import { playerFromVantage, type PlayerRef } from './player'
-import { applyCameraLimits, fitCampus } from '../map/options'
+import { applyCameraLimits } from '../map/options'
 
 export function useModeTransition(map: Map | null, playerRef: PlayerRef): {
   switchTo: (nextMode: CameraMode) => void
 } {
-  const mode = useAppStore((state) => state.mode)
   const setMode = useAppStore((state) => state.setMode)
   const setLocked = useAppStore((state) => state.setLocked)
+  const setLockRefused = useAppStore((state) => state.setLockRefused)
   const setTransitioning = useAppStore((state) => state.setTransitioning)
 
   const switchTo = (nextMode: CameraMode) => {
-    if (!map || mode === nextMode) return
+    if (!map) return
 
-    const plan = transitionPlan(mode, nextMode)
+    const state = useAppStore.getState()
+    if (state.mode === nextMode || state.transitioning) return
+
+    const rect = map.getContainer().getBoundingClientRect()
+    const plan = transitionPlan(state.mode, nextMode, {
+      width: rect.width || 1280,
+      height: rect.height || 800,
+    })
     if (!plan) {
       setMode(nextMode)
       return
@@ -27,12 +34,19 @@ export function useModeTransition(map: Map | null, playerRef: PlayerRef): {
     applyCameraLimits(map, nextMode)
     setTransitioning(true)
 
-    map.easeTo({
-      ...plan,
-      duration: 1200,
-    })
+    if (nextMode === 'free') {
+      // Ask for the pointer inside the click gesture. Waiting for the async
+      // moveend loses transient activation in browsers other than Chrome.
+      setLocked(true)
+      void requestPointerLockSafe(map.getCanvas()).then((granted) => {
+        setLocked(granted)
+        setLockRefused(!granted)
+      })
+    }
 
-    map.once('moveend', async () => {
+    map.easeTo({ ...plan, duration: 1200 })
+
+    map.once('moveend', () => {
       setTransitioning(false)
       setMode(nextMode)
 
@@ -40,12 +54,9 @@ export function useModeTransition(map: Map | null, playerRef: PlayerRef): {
         // Hand the eased drone vantage to the player so the first RAF frame
         // does not snap the camera to the origin.
         playerRef.current = playerFromVantage(FREE_VANTAGE)
-        const canvas = map.getCanvas()
-        const lockedSuccess = await requestPointerLockSafe(canvas)
-        setLocked(lockedSuccess)
       } else {
-        fitCampus(map)
         setLocked(false)
+        setLockRefused(false)
         if (document.exitPointerLock) {
           document.exitPointerLock()
         }
@@ -61,12 +72,13 @@ export function useModeTransition(map: Map | null, playerRef: PlayerRef): {
           document.exitPointerLock()
         }
         setLocked(false)
+        setLockRefused(false)
       }
     }
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [setLocked])
+  }, [setLocked, setLockRefused])
 
   return { switchTo }
 }

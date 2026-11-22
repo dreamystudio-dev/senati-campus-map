@@ -5,12 +5,14 @@ export type CameraMode = 'top' | 'free'
 interface AppState {
   mode: CameraMode
   locked: boolean
+  lockRefused: boolean
   transitioning: boolean
   hoveredId: string | null
   selectedId: string | null
   hoverPosition: { x: number; y: number } | null
   setMode: (mode: CameraMode) => void
   setLocked: (locked: boolean) => void
+  setLockRefused: (refused: boolean) => void
   setTransitioning: (transitioning: boolean) => void
   setHovered: (id: string | null, position?: { x: number; y: number } | null) => void
   select: (id: string | null) => void
@@ -19,19 +21,21 @@ interface AppState {
 export const useAppStore = create<AppState>((set) => ({
   mode: 'top',
   locked: false,
+  lockRefused: false,
   transitioning: false,
   hoveredId: null,
   selectedId: null,
   hoverPosition: null,
 
   setMode: (mode) =>
-    set({
+    set((state) => ({
       mode,
-      locked: mode === 'free',
+      locked: mode === 'free' && state.locked,
+      lockRefused: mode === 'free' && state.lockRefused,
       selectedId: null,
       hoveredId: null,
       hoverPosition: null,
-    }),
+    })),
 
   setLocked: (locked) =>
     set((state) => ({
@@ -39,6 +43,8 @@ export const useAppStore = create<AppState>((set) => ({
       hoveredId: locked ? null : state.hoveredId,
       hoverPosition: locked ? null : state.hoverPosition,
     })),
+
+  setLockRefused: (lockRefused) => set({ lockRefused }),
 
   setTransitioning: (transitioning) => set({ transitioning }),
 

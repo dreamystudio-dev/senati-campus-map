@@ -1,5 +1,5 @@
 import type { CameraOptions } from 'maplibre-gl'
-import { CAMPUS } from '../map/bounds'
+import { CAMPUS, fitZoom } from '../map/bounds'
 
 export const FREE_VANTAGE = {
   lng: CAMPUS.center[0],
@@ -13,6 +13,7 @@ export const FREE_VANTAGE = {
 export function transitionPlan(
   from: 'top' | 'free',
   to: 'top' | 'free',
+  viewport: { width: number; height: number } = { width: 1280, height: 800 },
 ): CameraOptions | null {
   if (from === to) return null
 
@@ -25,12 +26,12 @@ export function transitionPlan(
     }
   }
 
-  // to === 'top'
+  // to === 'top' — include the fitted zoom so the ease owns the whole move.
   return {
     center: CAMPUS.center,
+    zoom: fitZoom(CAMPUS.bounds, viewport, 48),
     pitch: 0,
     bearing: 0,
-    // top view will re-fit zoom to bounds
   }
 }
 

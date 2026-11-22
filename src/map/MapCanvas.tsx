@@ -21,6 +21,8 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const onMapLoadedRef = useRef(onMapLoaded)
+  onMapLoadedRef.current = onMapLoaded
   const [mapInstance, setMapInstance] = useState<Map | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -50,7 +52,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
         }
         currentMap = map
         setMapInstance(map)
-        onMapLoaded?.(map)
+        onMapLoadedRef.current?.(map)
       })
       .catch((err) => {
         if (!isCancelled) {
@@ -85,7 +87,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
         setMapInstance(null)
       }
     }
-  }, [onMapLoaded])
+  }, [])
 
   return (
     <div className="relative w-full h-full">

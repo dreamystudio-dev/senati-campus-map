@@ -1,9 +1,9 @@
-import { CAMPUS } from '../map/bounds'
+import { CAMPUS, paddedBounds } from '../map/bounds'
 
 export interface Player {
   x: number
   y: number
-  heading: number // in radians or degrees? let's check heading 0 points east => cos(heading), sin(heading)
+  heading: number // radians; 0 points east, positive rotates north
   eyeM: number
   pitchDeg: number
 }
@@ -57,6 +57,13 @@ export function lngLatToMetres(origin: [number, number], lng: number, lat: numbe
   ]
 }
 
+export const PLAYER_BOUNDS = (() => {
+  const [w, s, e, n] = paddedBounds(CAMPUS.bounds, 0.1)
+  const [minX, minY] = lngLatToMetres(CAMPUS.center, w, s)
+  const [maxX, maxY] = lngLatToMetres(CAMPUS.center, e, n)
+  return { minX, maxX, minY, maxY }
+})()
+
 export function playerFromVantage(v: Vantage): Player {
   const [x, y] = lngLatToMetres(CAMPUS.center, v.lng, v.lat)
   return {
@@ -88,25 +95,7 @@ export function stepPlayer(p: Player, input: InputState, dt: number): Player {
     const normX = moveX / len
     const normY = moveY / len
 
-    // Heading 0 points East (+x). Heading theta rotates coordinate frame:
-    // Forward direction: (cos(heading), sin(heading))
-    // Right direction: (sin(heading), -cos(heading)) or similar standard FPS movement
-    // When heading is 0: forward is +x, right is -y or +y?
-    // In still test: heading 0, forward=true => p.x = walk, p.y = 0.
-    // forward: dx = normX * cos(heading) - normY * sin(heading)... wait, let's check:
-    // If forward=true, right=true => moveX=1, moveY=1.
-    // Hypotenuse is sqrt(2). normX = 1/sqrt(2), normY = 1/sqrt(2).
-    // The test expects: Math.hypot(p.x, p.y) toBeCloseTo walk
-    // With heading 0:
-    // forward moves along heading: (cos(heading), sin(heading))
-    // right moves perpendicular to forward (90 deg clockwise or counterclockwise? In cartesian +x is East, +y is North):
-    // If heading is from East counter-clockwise or clockwise?
-    // Forward vector: F = [cos(h), sin(h)]
-    // Strafe right vector: R = [sin(h), -cos(h)]
-    // Then movement = (normX * F + normY * R) * speed * dt
-    // If heading = 0: F = [1, 0], R = [0, -1].
-    // Then forward=1, right=1 => movement = [1/sqrt(2)*1, 1/sqrt(2)*(-1)] * speed * dt.
-    // Hypotenuse = sqrt( (speed/sqrt(2))^2 + (-speed/sqrt(2))^2 ) = speed * dt!
+    // Forward is (cos h, sin h); strafe right is (sin h, -cos h).
     const forwardX = Math.cos(p.heading)
     const forwardY = Math.sin(p.heading)
     const rightX = Math.sin(p.heading)
@@ -117,6 +106,10 @@ export function stepPlayer(p: Player, input: InputState, dt: number): Player {
 
     newX += vx * speed * dt
     newY += vy * speed * dt
+
+    // Keep the player inside the same padded box that constrains the camera.
+    newX = Math.min(PLAYER_BOUNDS.maxX, Math.max(PLAYER_BOUNDS.minX, newX))
+    newY = Math.min(PLAYER_BOUNDS.maxY, Math.max(PLAYER_BOUNDS.minY, newY))
   }
 
   // Vertical movement

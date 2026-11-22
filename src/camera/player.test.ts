@@ -2,6 +2,7 @@
 import { CAMPUS } from '../map/bounds'
 import { FREE_VANTAGE } from './transition'
 import {
+  PLAYER_BOUNDS,
   PLAYER_LIMITS,
   eyeAndAhead,
   lngLatToMetres,
@@ -49,6 +50,14 @@ it('converts vantage coordinates back to local metres', () => {
   const [x, y] = lngLatToMetres(CAMPUS.center, lng, lat)
   expect(x).toBeCloseTo(12, 4)
   expect(y).toBeCloseTo(-34, 4)
+})
+
+it('keeps the player inside the padded campus box', () => {
+  const p = stepPlayer(still, { ...noInput, forward: true, sprint: true }, 1000)
+  expect(p.x).toBeCloseTo(PLAYER_BOUNDS.maxX, 3)
+  expect(stepPlayer(still, { ...noInput, back: true, sprint: true }, 1000).x).toBeCloseTo(PLAYER_BOUNDS.minX, 3)
+  expect(p.y).toBeGreaterThanOrEqual(PLAYER_BOUNDS.minY)
+  expect(p.y).toBeLessThanOrEqual(PLAYER_BOUNDS.maxY)
 })
 
 it('seeds the player at the free vantage with a matching heading and pitch', () => {

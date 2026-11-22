@@ -11,18 +11,20 @@ export function useFreeView(
 ): void {
   const mode = useAppStore((state) => state.mode)
   const locked = useAppStore((state) => state.locked)
+  const lockRefused = useAppStore((state) => state.lockRefused)
   const transitioning = useAppStore((state) => state.transitioning)
   const setLocked = useAppStore((state) => state.setLocked)
+  const setLockRefused = useAppStore((state) => state.setLockRefused)
 
   const keysRef = useRef<KeyState>({})
   const lastTimeRef = useRef<number | null>(null)
   const isDraggingRef = useRef(false)
 
-  // Disable standard map handlers while free view is active
+  // Disable standard map handlers while free view or a transition owns the camera
   useEffect(() => {
     if (!map) return
 
-    if (mode === 'free') {
+    if (mode === 'free' || transitioning) {
       map.dragPan.disable()
       map.dragRotate.disable()
       map.scrollZoom.disable()
@@ -35,12 +37,13 @@ export function useFreeView(
       map.doubleClickZoom.enable()
       map.touchZoomRotate.enable()
     }
-  }, [map, mode])
+  }, [map, mode, transitioning])
 
-  // Track keyboard events
+  // Track keyboard events. While unlocked (Esc) the camera is frozen and WASD
+  // is ignored — the effect cleanup also drops any half-pressed keys.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (mode !== 'free' || transitioning) return
+      if (mode !== 'free' || transitioning || !locked) return
       keysRef.current[e.code] = true
     }
 
@@ -57,7 +60,7 @@ export function useFreeView(
       window.removeEventListener('keyup', onKeyUp)
       keysRef.current = {}
     }
-  }, [mode, transitioning])
+  }, [mode, transitioning, locked])
 
   // Track mouse movement, pointer lock, and drag-to-look fallback
   useEffect(() => {
@@ -70,10 +73,11 @@ export function useFreeView(
 
     const onPointerLockError = () => {
       setLocked(false)
+      setLockRefused(true)
     }
 
     const onMouseDown = (e: MouseEvent) => {
-      if (mode !== 'free' || locked) return
+      if (mode !== 'free' || !lockRefused) return
       if (e.button === 0) {
         isDraggingRef.current = true
       }
@@ -86,8 +90,9 @@ export function useFreeView(
     const onMouseMove = (e: MouseEvent) => {
       if (mode !== 'free' || transitioning) return
 
-      // Look is active if pointer is locked OR user is dragging (fallback)
-      if (locked || isDraggingRef.current) {
+      // Drag-look is the fallback only when the browser refused pointer lock.
+      // After Esc the camera stays frozen until the canvas is clicked.
+      if (locked || (lockRefused && isDraggingRef.current)) {
         const deltaYawDeg = -e.movementX * 0.12
         const deltaPitchDeg = -e.movementY * 0.12
         playerRef.current = turn(playerRef.current, deltaYawDeg, deltaPitchDeg)
@@ -107,16 +112,17 @@ export function useFreeView(
       window.removeEventListener('mouseup', onMouseUp)
       window.removeEventListener('mousemove', onMouseMove)
     }
-  }, [canvas, mode, locked, transitioning, setLocked])
+  }, [canvas, mode, locked, lockRefused, transitioning, setLocked, setLockRefused])
 
-  // requestAnimationFrame loop
+  // requestAnimationFrame loop — only the locked state owns the camera
   useEffect(() => {
-    if (!map || mode !== 'free' || transitioning) {
+    if (!map || mode !== 'free' || transitioning || !locked) {
       lastTimeRef.current = null
       return
     }
 
     let animId: number
+    let failures = 0
 
     const tick = (time: number) => {
       if (lastTimeRef.current === null) {
@@ -126,7 +132,6 @@ export function useFreeView(
       lastTimeRef.current = time
       const dt = Math.min(0.05, Math.max(0.001, rawDt))
 
-      // Only move if locked or if keyboard input is active
       const input = inputFromKeys(keysRef.current)
       playerRef.current = stepPlayer(playerRef.current, input, dt)
 
@@ -142,8 +147,13 @@ export function useFreeView(
           aheadAltitudeM,
         )
         map.jumpTo(camOpts)
-      } catch {
-        // MapLibre safety check
+        failures = 0
+      } catch (error) {
+        failures += 1
+        if (failures >= 3) {
+          console.error('Free-view camera projection failed; stopping the loop.', error)
+          return
+        }
       }
 
       animId = requestAnimationFrame(tick)
@@ -155,5 +165,5 @@ export function useFreeView(
       cancelAnimationFrame(animId)
       lastTimeRef.current = null
     }
-  }, [map, mode, transitioning])
+  }, [map, mode, locked, transitioning])
 }
