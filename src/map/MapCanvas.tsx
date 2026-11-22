@@ -3,8 +3,6 @@ import type { Map } from 'maplibre-gl'
 import { createMap, webglAvailable } from './createMap'
 import { fitCampus } from './options'
 import { useTopView } from '../camera/useTopView'
-import { useFreeView } from '../camera/useFreeView'
-import type { PlayerRef } from '../camera/player'
 import { useAppStore } from '../store'
 import { LoadingOverlay } from '../ui/LoadingOverlay'
 import { ErrorOverlay } from '../ui/ErrorOverlay'
@@ -13,18 +11,8 @@ export interface MapCanvasHandle {
   getMap: () => Map | null
 }
 
-interface MapCanvasProps {
-  onMapLoaded?: (map: Map) => void
-  playerRef: PlayerRef
-}
-
-export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas(
-  { onMapLoaded, playerRef },
-  ref,
-) {
+export const MapCanvas = forwardRef<MapCanvasHandle>(function MapCanvas(_props, ref) {
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const onMapLoadedRef = useRef(onMapLoaded)
-  onMapLoadedRef.current = onMapLoaded
   const [mapInstance, setMapInstance] = useState<Map | null>(null)
   const [mountKey, setMountKey] = useState(0)
 
@@ -35,7 +23,6 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
   }))
 
   useTopView(mapInstance)
-  useFreeView(mapInstance, mapInstance ? mapInstance.getCanvas() : null, playerRef)
 
   const handleRetry = useCallback(() => {
     setMapStatus('loading')
@@ -62,7 +49,6 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
         }
         currentMap = map
         setMapInstance(map)
-        onMapLoadedRef.current?.(map)
       })
       .catch((err) => {
         if (!isCancelled) {
@@ -70,7 +56,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
         }
       })
 
-    // ResizeObserver: re-fit when mode is top, otherwise just resize
+    // Keep the campus fitted when the container changes size
     const resizeObserver = new ResizeObserver(() => {
       if (!currentMap) return
       currentMap.resize()

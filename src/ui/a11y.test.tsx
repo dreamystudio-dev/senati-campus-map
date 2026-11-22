@@ -1,6 +1,5 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { ModeSwitch } from './ModeSwitch'
 import { InfoCard } from './InfoCard'
 import { useAppStore } from '../store'
 
@@ -14,16 +13,6 @@ beforeEach(() => {
     hoveredId: null,
     hoverPosition: null,
   })
-})
-
-it('is operable by keyboard and reports its state', async () => {
-  render(<ModeSwitch />)
-  const free = screen.getByRole('button', { name: /free/i })
-  await userEvent.tab()
-  await userEvent.tab()
-  expect(free).toHaveFocus()
-  await userEvent.keyboard('{Enter}')
-  expect(free).toHaveAttribute('aria-pressed', 'true')
 })
 
 it('closes InfoCard on Escape and returns focus to map canvas', async () => {

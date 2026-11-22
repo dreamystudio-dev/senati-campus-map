@@ -8,7 +8,6 @@ import { PLACES_SOURCE_ID, HOVER_SOURCE_ID, placesLayers } from './layers'
 import placesData from '../data/places.geojson'
 import { useAppStore } from '../store'
 import { mapOptions } from './options'
-import { requestPointerLockSafe } from '../camera/transition'
 
 export function webglAvailable(): boolean {
   try {
@@ -119,7 +118,6 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     // Hover interactions
     map.on('mousemove', (e: MapMouseEvent) => {
       const state = useAppStore.getState()
-      if (state.mode === 'free' && state.locked) return
 
       const bboxSize = 6
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
@@ -145,7 +143,6 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     // Click selection
     map.on('click', (e: MapMouseEvent) => {
       const state = useAppStore.getState()
-      if (state.mode === 'free' && state.locked) return
 
       const bboxSize = 6
       const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
@@ -160,14 +157,6 @@ export async function createMap(container: HTMLElement): Promise<Map> {
       }
 
       state.select(null)
-      // Esc leaves free view unlocked: a click on empty canvas re-locks.
-      // Clicking a place still opens its info card instead.
-      if (state.mode === 'free' && !state.locked && !state.lockRefused) {
-        void requestPointerLockSafe(map.getCanvas()).then((granted) => {
-          state.setLocked(granted)
-          state.setLockRefused(!granted)
-        })
-      }
     })
   })
 
