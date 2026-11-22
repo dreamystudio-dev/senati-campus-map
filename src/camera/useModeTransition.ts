@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
 import type { Map } from 'maplibre-gl'
 import { useAppStore, type CameraMode } from '../store'
-import { transitionPlan, requestPointerLockSafe } from './transition'
-import { fitCampus } from '../map/options'
+import { transitionPlan, requestPointerLockSafe, FREE_VANTAGE } from './transition'
+import { playerFromVantage, type PlayerRef } from './player'
+import { applyCameraLimits, fitCampus } from '../map/options'
 
-export function useModeTransition(map: Map | null): {
+export function useModeTransition(map: Map | null, playerRef: PlayerRef): {
   switchTo: (nextMode: CameraMode) => void
 } {
   const mode = useAppStore((state) => state.mode)
@@ -21,6 +22,9 @@ export function useModeTransition(map: Map | null): {
       return
     }
 
+    // The caps are per-mode: free view needs a zoom beyond 19.5 and a pitch
+    // beyond 60 before the first frame of the first-person loop runs.
+    applyCameraLimits(map, nextMode)
     setTransitioning(true)
 
     map.easeTo({
@@ -33,6 +37,9 @@ export function useModeTransition(map: Map | null): {
       setMode(nextMode)
 
       if (nextMode === 'free') {
+        // Hand the eased drone vantage to the player so the first RAF frame
+        // does not snap the camera to the origin.
+        playerRef.current = playerFromVantage(FREE_VANTAGE)
         const canvas = map.getCanvas()
         const lockedSuccess = await requestPointerLockSafe(canvas)
         setLocked(lockedSuccess)

@@ -8,6 +8,16 @@ export interface Player {
   pitchDeg: number
 }
 
+export type PlayerRef = { current: Player }
+
+export interface Vantage {
+  lng: number
+  lat: number
+  eyeM: number
+  mapPitch: number
+  headingDeg: number
+}
+
 export interface InputState {
   forward: boolean
   back: boolean
@@ -37,6 +47,26 @@ export function metresToLngLat(origin: [number, number], x: number, y: number): 
   const lng = lng0 + x / metersPerDegreeLng
   const lat = lat0 + y / metersPerDegreeLat
   return [lng, lat]
+}
+
+export function lngLatToMetres(origin: [number, number], lng: number, lat: number): [number, number] {
+  const latRad = (origin[1] * Math.PI) / 180
+  return [
+    (lng - origin[0]) * 111320 * Math.cos(latRad),
+    (lat - origin[1]) * 111320,
+  ]
+}
+
+export function playerFromVantage(v: Vantage): Player {
+  const [x, y] = lngLatToMetres(CAMPUS.center, v.lng, v.lat)
+  return {
+    x,
+    y,
+    heading: (v.headingDeg * Math.PI) / 180,
+    eyeM: v.eyeM,
+    // MapLibre pitch is measured from straight down; a level gaze is 90°.
+    pitchDeg: v.mapPitch - 90,
+  }
 }
 
 export function stepPlayer(p: Player, input: InputState, dt: number): Player {

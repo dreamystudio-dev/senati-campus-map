@@ -4,6 +4,7 @@ import { createMap, webglAvailable } from './createMap'
 import { fitCampus } from './options'
 import { useTopView } from '../camera/useTopView'
 import { useFreeView } from '../camera/useFreeView'
+import type { PlayerRef } from '../camera/player'
 import { useAppStore } from '../store'
 
 export interface MapCanvasHandle {
@@ -12,10 +13,11 @@ export interface MapCanvasHandle {
 
 interface MapCanvasProps {
   onMapLoaded?: (map: Map) => void
+  playerRef: PlayerRef
 }
 
 export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas(
-  { onMapLoaded },
+  { onMapLoaded, playerRef },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -27,7 +29,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
   }))
 
   useTopView(mapInstance)
-  useFreeView(mapInstance, mapInstance ? mapInstance.getCanvas() : null)
+  useFreeView(mapInstance, mapInstance ? mapInstance.getCanvas() : null, playerRef)
 
   useEffect(() => {
     if (!containerRef.current) return

@@ -1,5 +1,15 @@
 // src/camera/player.test.ts
-import { PLAYER_LIMITS, eyeAndAhead, metresToLngLat, stepPlayer, turn } from './player'
+import { CAMPUS } from '../map/bounds'
+import { FREE_VANTAGE } from './transition'
+import {
+  PLAYER_LIMITS,
+  eyeAndAhead,
+  lngLatToMetres,
+  metresToLngLat,
+  playerFromVantage,
+  stepPlayer,
+  turn,
+} from './player'
 
 const still = { x: 0, y: 0, heading: 0, eyeM: 25, pitchDeg: 0 }
 const noInput = { forward: false, back: false, left: false, right: false, up: false, down: false, sprint: false }
@@ -32,4 +42,21 @@ it('round-trips metres through lng/lat', () => {
 it('puts the look-ahead point in front of the camera', () => {
   const { eye, ahead } = eyeAndAhead({ ...still, heading: 0 }, 20)
   expect(ahead[0]).toBeGreaterThan(eye[0])
+})
+
+it('converts vantage coordinates back to local metres', () => {
+  const [lng, lat] = metresToLngLat(CAMPUS.center, 12, -34)
+  const [x, y] = lngLatToMetres(CAMPUS.center, lng, lat)
+  expect(x).toBeCloseTo(12, 4)
+  expect(y).toBeCloseTo(-34, 4)
+})
+
+it('seeds the player at the free vantage with a matching heading and pitch', () => {
+  const p = playerFromVantage(FREE_VANTAGE)
+  expect(p.x).toBeCloseTo(0, 3)
+  expect(p.y).toBeCloseTo(-167, 0)
+  expect(p.heading).toBeCloseTo(Math.PI / 2, 5)
+  expect(p.eyeM).toBe(FREE_VANTAGE.eyeM)
+  expect(p.pitchDeg).toBe(FREE_VANTAGE.mapPitch - 90)
+  expect(eyeAndAhead(p).eye[1]).toBeCloseTo(FREE_VANTAGE.lat, 6)
 })

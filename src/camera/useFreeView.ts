@@ -2,22 +2,17 @@ import { useEffect, useRef } from 'react'
 import { LngLat, type Map } from 'maplibre-gl'
 import { useAppStore } from '../store'
 import { inputFromKeys, type KeyState } from './input'
-import { stepPlayer, turn, eyeAndAhead, type Player } from './player'
-import { FREE_VANTAGE } from './transition'
+import { stepPlayer, turn, eyeAndAhead, type PlayerRef } from './player'
 
-export function useFreeView(map: Map | null, canvas: HTMLCanvasElement | null): void {
+export function useFreeView(
+  map: Map | null,
+  canvas: HTMLCanvasElement | null,
+  playerRef: PlayerRef,
+): void {
   const mode = useAppStore((state) => state.mode)
   const locked = useAppStore((state) => state.locked)
   const transitioning = useAppStore((state) => state.transitioning)
   const setLocked = useAppStore((state) => state.setLocked)
-
-  const playerRef = useRef<Player>({
-    x: 0,
-    y: 0,
-    heading: 0,
-    eyeM: FREE_VANTAGE.eyeM,
-    pitchDeg: 0,
-  })
 
   const keysRef = useRef<KeyState>({})
   const lastTimeRef = useRef<number | null>(null)
