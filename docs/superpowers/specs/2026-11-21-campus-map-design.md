@@ -100,8 +100,9 @@ senati-campus-map/
   large institutional buildings are often relations in OSM.
 - Converts the Overpass response with `osmtogeojson`, which assembles multipolygons and
   handles relation members correctly.
-- Drops features that resolve to no category, and drops filler landuse (`grass`, `residential`,
-  `industrial`) that would otherwise paint the whole map.
+- Drops uncategorised areas and points, including filler landuse (`grass`, `residential`,
+  `industrial`) that would otherwise paint the whole map. Keeps uncategorised **buildings**
+  with `category: null` — they give the campus its 3D mass and render neutral.
 - Keeps `name`, `building`, `building:levels`, `height`, and the category-bearing tags.
 - Derives `heightM` for buildings: parse the `height` tag when present, otherwise
   `building:levels × 3.2`, otherwise 6 m. Clamped to 4–60 m.
@@ -112,9 +113,9 @@ senati-campus-map/
 The output is committed. The script is idempotent and only needs re-running if the campus data
 changes. Expected size: roughly 90–120 features after dropping filler, well under 500 KB.
 
-Each feature carries `id` (OSM type and id, e.g. `way/70606031`), `name`, `category`,
-`kind` (the raw OSM tag), `levels`, `heightM`, and `geometryType`
-(`building`, `area`, or `point`).
+Each feature carries `id` (OSM type and id, e.g. `way/70606031`), `name`, `category`
+(`null` for neutral context buildings), `kind` (the raw OSM tag), `levels`, `heightM`, and
+`geometryType` (`building`, `area`, or `point`).
 
 ### 4. Categories
 

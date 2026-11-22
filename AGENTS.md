@@ -47,6 +47,8 @@ campus data or the category table changes, and commit the regenerated GeoJSON.
 - **Static hosting only.** No API keys, no environment variables, no server functions.
 - **No runtime Overpass calls.** `src/data/places.geojson` is committed.
 - **Closed category table.** Unknown OSM tags are dropped at fetch time, never rendered.
+  Uncategorised buildings are the one exception: they are kept with `category: null` and render
+  neutral, so the campus keeps its 3D mass.
 - **Camera limits.** Top view: zoom 15.5–19.5, pitch 0–60°. Free view: eye 2–80 m, pitch ≤ 95°.
 - **Bounded map.** `maxBounds` is the campus box padded 10%; the camera cannot leave it.
 - **Fixed palette.** sky `#5aa9e6`, coral `#ef6f6c`, amber `#f2b134`, violet `#9b7ede`,

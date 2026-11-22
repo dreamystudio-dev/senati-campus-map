@@ -270,7 +270,7 @@ git commit -m "feat: category table and tag resolution"
 **Interfaces:**
 - Consumes: `resolveCategory`, `CATEGORY_BY_ID` from `src/categories.ts`.
 - Produces:
-  - `interface PlaceProps { id: string; name?: string; category: CategoryId; kind: string; geometryType: 'building' | 'area' | 'point'; levels?: number; heightM?: number; labelLng: number; labelLat: number }`
+  - `interface PlaceProps { id: string; name?: string; category: CategoryId | null; kind: string; geometryType: 'building' | 'area' | 'point'; levels?: number; heightM?: number; labelLng: number; labelLat: number }`
   - `deriveHeightM(tags: Record<string, string>): number`
   - `transformOverpass(osm: OverpassJson): FeatureCollection<Geometry, PlaceProps>`
 
@@ -325,7 +325,7 @@ Expected: FAIL, cannot resolve `./fetch-places`.
 
 - [ ] **Step 3: Implement `scripts/fetch-places.ts`**
 
-Query Overpass with `[out:json][timeout:90]` over the campus bbox for `nwr["building"]`, `nwr["amenity"]`, `nwr["shop"]`, `nwr["leisure"]`, `nwr["tourism"]`, using `out geom`. Convert with `osmtogeojson`; it ships no types, so add `scripts/osmtogeojson.d.ts` declaring `convert(osm: unknown): FeatureCollection`. For each feature: resolve category, skip nulls, classify geometry (`building` when a `building` tag exists, `area` for ways/relations without one, `point` for nodes), derive height for buildings, compute `polylabel` for polygons and the node coordinate for points, write `id` as `${type}/${id}`. Guard the CLI write with `if (process.argv[1]?.endsWith('fetch-places.ts'))` so importing the module in tests does no I/O. CLI mode writes `src/data/places.geojson` with 5-decimal coordinates and prints the feature count per category.
+Query Overpass with `[out:json][timeout:90]` over the campus bbox for `nwr["building"]`, `nwr["amenity"]`, `nwr["shop"]`, `nwr["leisure"]`, `nwr["tourism"]`, `nwr["landuse"]`, using `out geom`. Convert with `osmtogeojson`; it ships no types, so add `scripts/osmtogeojson.d.ts` declaring `convert(osm: unknown): FeatureCollection`. For each feature: resolve category. Drop features with no category **unless they are buildings** — uncategorised buildings are kept with `category: null` so the campus keeps its 3D mass and renders neutral. Classify geometry (`building` when a `building` tag exists, `area` for ways/relations without one, `point` for nodes), derive height for buildings, compute `polylabel` for polygons and the node coordinate for points, write `id` as `${type}/${id}`. Guard the CLI write with `if (process.argv[1]?.endsWith('fetch-places.ts'))` so importing the module in tests does no I/O. CLI mode writes `src/data/places.geojson` with 5-decimal coordinates and prints the feature count per category, bucketing `null` as `uncategorised`.
 
 - [ ] **Step 4: Run the tests and confirm they pass**
 
@@ -335,7 +335,7 @@ Expected: PASS, 4 tests.
 - [ ] **Step 5: Generate the real data and check it**
 
 Run: `pnpm data`
-Expected: prints roughly 90–120 features, no category with zero features, `src/data/places.geojson` under 500 KB.
+Expected: prints one bucket per category plus `uncategorised` for neutral buildings, every category that exists in the box has features (including `construction`), and `src/data/places.geojson` is under 500 KB.
 
 - [ ] **Step 6: Commit**
 
@@ -465,7 +465,7 @@ Expected: FAIL, cannot resolve `./layers`.
 
 - [ ] **Step 3: Implement `src/map/layers.ts` and add the source**
 
-Buildings: `fill-extrusion`, colour from `categoryColorExpression()`, height from `heightM`, opacity 0.92, outline categories get `#6b7a8f` at 0.35 opacity. Areas: a tinted fill layer plus a 2 px outline layer, both filtered on `geometryType === 'area'`. Points: `circle` layer with `circle-pitch-alignment: 'viewport'`, radius 5–7 px by zoom, colour from the expression. Labels: `symbol` layer, `text-field` as `['coalesce', ['get', 'name'], ['get', 'genericLabel']]`, halo `#12151b` width 1.5, `text-size` interpolated 11→15 px from zoom 15.5→19.5.
+Buildings: `fill-extrusion`, colour from `categoryColorExpression()`, height from `heightM`, opacity 0.92, outline categories get `#6b7a8f` at 0.35 opacity. The expression's final fallback is neutral slate `#2a303b`, which is also what `category: null` context buildings use — they must render as mass, not disappear. Areas: a tinted fill layer plus a 2 px outline layer, both filtered on `geometryType === 'area'`. Points: `circle` layer with `circle-pitch-alignment: 'viewport'`, radius 5–7 px by zoom, colour from the expression. Labels: `symbol` layer, `text-field` as `['coalesce', ['get', 'name'], ['get', 'genericLabel']]`, halo `#12151b` width 1.5, `text-size` interpolated 11→15 px from zoom 15.5→19.5.
 
 `createMap` adds the source from the imported GeoJSON, then adds `placesLayers()` before the first symbol layer of the basemap so labels stay on top.
 
@@ -525,6 +525,11 @@ it('never returns a blank title for an unnamed building', () => {
   expect(describePlace({ ...p }).title).toBe('Unnamed shop')
 })
 
+it('labels neutral context buildings with a null category', () => {
+  const p = { ...base, category: null, geometryType: 'building' } as const
+  expect(describePlace({ ...p })).toMatchObject({ title: 'Unnamed building', meta: ['Building'] })
+})
+
 it('reports levels and height when known', () => {
   const p = { ...base, category: 'education', geometryType: 'building', levels: 2, heightM: 6.4 } as const
   expect(describePlace({ ...p }).meta).toEqual(['Education', '2 levels', '6.4 m'])
@@ -559,7 +564,7 @@ Expected: FAIL, modules missing.
 
 - [ ] **Step 3: Implement the store, description helper and overlays**
 
-`describePlace` builds the title from `name`, then `CATEGORY_BY_ID[category].genericLabel`, then `Unnamed ${category}`. Meta starts with the category label, then `N levels` when known, then `H m` with one decimal. The map listens to `mousemove` for hover (only while unlocked or in top view), sets `hoveredId`, and positions the tooltip in screen space. `click` selects and opens the info card. Clicking empty map clears the selection.
+`describePlace` builds the title from `name`, then the category's `genericLabel`, then `Unnamed ${category}`. For `category: null` context buildings the title is `name` or `Unnamed building`, and the meta starts with `Building`. Meta otherwise starts with the category label, then `N levels` when known, then `H m` with one decimal. The map listens to `mousemove` for hover (only while unlocked or in top view), sets `hoveredId`, and positions the tooltip in screen space. `click` selects and opens the info card. Clicking empty map clears the selection.
 
 - [ ] **Step 4: Run the tests and confirm they pass**
 
