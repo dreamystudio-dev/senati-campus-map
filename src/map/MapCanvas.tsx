@@ -101,7 +101,13 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
 
   return (
     <div className="relative w-full h-full">
-      <div ref={containerRef} data-testid="map" className="w-full h-full" />
+      <div
+        ref={containerRef}
+        data-testid="map-canvas"
+        tabIndex={0}
+        aria-label="3D map of SENATI Sede Principal campus"
+        className="w-full h-full focus-visible:outline-none"
+      />
       <LoadingOverlay />
       <ErrorOverlay onRetry={handleRetry} />
     </div>
