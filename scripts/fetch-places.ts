@@ -9,7 +9,7 @@ import { resolveCategory, type CategoryId } from '../src/categories'
 export interface PlaceProps {
   id: string
   name?: string
-  category: CategoryId
+  category: CategoryId | null
   kind: string
   geometryType: 'building' | 'area' | 'point'
   levels?: number
@@ -87,13 +87,16 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
 
     const tags: Record<string, string> = (feature.properties?.tags || feature.properties || {})
     const category = resolveCategory(tags)
-    if (!category) continue
+    const isBuilding = Boolean(tags.building && tags.building !== 'no')
+    // Uncategorised buildings are kept as neutral context: they give the campus
+    // its 3D mass. Uncategorised areas and points are filler and are dropped.
+    if (!category && !isBuilding) continue
 
     // Determine geometryType
     const geomType = feature.geometry.type
     let placeGeometryType: 'building' | 'area' | 'point'
 
-    if (tags.building && tags.building !== 'no') {
+    if (isBuilding) {
       placeGeometryType = 'building'
     } else if (geomType === 'Point') {
       placeGeometryType = 'point'
@@ -133,13 +136,13 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
     // ID formatting: osm type and id (feature.id is usually "way/123", "node/123", "relation/123")
     const id = String(feature.id)
 
-    const kind = getPrimaryKind(tags, category.id)
+    const kind = category ? getPrimaryKind(tags, category.id) : `building=${tags.building ?? 'yes'}`
     const levels = tags['building:levels'] ? parseFloat(tags['building:levels']) : undefined
     const heightM = placeGeometryType === 'building' ? deriveHeightM(tags) : undefined
 
     const props: PlaceProps = {
       id,
-      category: category.id,
+      category: category?.id ?? null,
       kind,
       geometryType: placeGeometryType,
       labelLng: round5(labelLng),
@@ -179,6 +182,7 @@ async function runFetch() {
   nwr["shop"](${bbox});
   nwr["leisure"](${bbox});
   nwr["tourism"](${bbox});
+  nwr["landuse"](${bbox});
 );
 out geom;`
 
@@ -190,23 +194,32 @@ out geom;`
   ]
 
   let data: any = null
-  for (const url of endpoints) {
-    try {
-      console.log(`Trying ${url}...`)
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'senati-campus-map-build/1.0',
-        },
-        body: `data=${encodeURIComponent(query)}`,
-      })
-      if (res.ok) {
-        data = await res.json()
-        break
+  const fileArg = process.argv.indexOf('--from-file')
+  if (fileArg !== -1) {
+    const filePath = process.argv[fileArg + 1]
+    if (!filePath) throw new Error('--from-file needs a path to a saved Overpass JSON response')
+    console.log(`Reading Overpass response from ${filePath}`)
+    data = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+  } else {
+    for (const url of endpoints) {
+      try {
+        console.log(`Trying ${url}...`)
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'senati-campus-map-build/1.0',
+          },
+          body: `data=${encodeURIComponent(query)}`,
+        })
+        if (res.ok) {
+          data = await res.json()
+          break
+        }
+        console.warn(`${url} returned HTTP ${res.status}`)
+      } catch (err) {
+        console.warn(`Failed with ${url}:`, err)
       }
-    } catch (err) {
-      console.warn(`Failed with ${url}:`, err)
     }
   }
 
@@ -219,7 +232,7 @@ out geom;`
 
   const counts: Record<string, number> = {}
   for (const f of fc.features) {
-    const c = f.properties.category
+    const c = f.properties.category ?? 'uncategorised'
     counts[c] = (counts[c] || 0) + 1
   }
 

@@ -86,6 +86,22 @@
       "tags": {
         "amenity": "recycling"
       }
+    },
+    {
+      "type": "way",
+      "id": 500,
+      "tags": {
+        "building": "yes",
+        "building:levels": "3",
+        "name": "Taller 2"
+      },
+      "geometry": [
+        { "lat": -11.9975, "lon": -77.0605 },
+        { "lat": -11.9975, "lon": -77.0600 },
+        { "lat": -11.9970, "lon": -77.0600 },
+        { "lat": -11.9970, "lon": -77.0605 },
+        { "lat": -11.9975, "lon": -77.0605 }
+      ]
     }
   ]
 }
