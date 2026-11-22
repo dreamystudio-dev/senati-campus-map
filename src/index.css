@@ -1,1 +1,8 @@
+@import "@fontsource-variable/inter";
 @import "tailwindcss";
+
+body {
+  font-family: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #12151b;
+  color: #ffffff;
+}
