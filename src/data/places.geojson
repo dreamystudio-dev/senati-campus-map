@@ -1373,7 +1373,8 @@
         "kind": "leisure=park",
         "geometryType": "area",
         "labelLng": -77.06314,
-        "labelLat": -12.00188
+        "labelLat": -12.00188,
+        "genericLabel": "Parque"
       }
     },
     {
@@ -1433,7 +1434,8 @@
         "geometryType": "area",
         "labelLng": -77.0612,
         "labelLat": -11.9966,
-        "name": "Instituto Cultural Peruano Norteamericano"
+        "name": "Instituto Cultural Peruano Norteamericano",
+        "genericLabel": "Construcción"
       }
     },
     {
@@ -2075,7 +2077,8 @@
         "kind": "leisure=pitch",
         "geometryType": "area",
         "labelLng": -77.06355,
-        "labelLat": -11.99803
+        "labelLat": -11.99803,
+        "genericLabel": "Cancha"
       }
     },
     {
@@ -3041,7 +3044,8 @@
         "geometryType": "area",
         "labelLng": -77.06074,
         "labelLat": -11.99942,
-        "name": "Campo deportivo de futbol"
+        "name": "Campo deportivo de futbol",
+        "genericLabel": "Cancha"
       }
     },
     {
@@ -3081,7 +3085,8 @@
         "geometryType": "area",
         "labelLng": -77.06077,
         "labelLat": -11.99885,
-        "name": "Campo deportivo"
+        "name": "Campo deportivo",
+        "genericLabel": "Cancha"
       }
     },
     {
@@ -3262,7 +3267,8 @@
         "kind": "leisure=park",
         "geometryType": "area",
         "labelLng": -77.06131,
-        "labelLat": -11.99903
+        "labelLat": -11.99903,
+        "genericLabel": "Parque"
       }
     },
     {
@@ -3366,7 +3372,8 @@
         "kind": "leisure=park",
         "geometryType": "area",
         "labelLng": -77.06179,
-        "labelLat": -11.99861
+        "labelLat": -11.99861,
+        "genericLabel": "Parque"
       }
     },
     {
@@ -3683,7 +3690,8 @@
         "kind": "landuse=construction",
         "geometryType": "area",
         "labelLng": -77.05821,
-        "labelLat": -11.99632
+        "labelLat": -11.99632,
+        "genericLabel": "Construcción"
       }
     },
     {
@@ -4499,7 +4507,8 @@
         "geometryType": "area",
         "labelLng": -77.06039,
         "labelLat": -11.99641,
-        "name": "Universidad Norbert Wiener"
+        "name": "Universidad Norbert Wiener",
+        "genericLabel": "Construcción"
       }
     },
     {
@@ -4780,7 +4789,8 @@
         "kind": "landuse=brownfield",
         "geometryType": "area",
         "labelLng": -77.06071,
-        "labelLat": -11.99649
+        "labelLat": -11.99649,
+        "genericLabel": "Construcción"
       }
     },
     {
@@ -5056,7 +5066,8 @@
         "kind": "leisure=pitch",
         "geometryType": "area",
         "labelLng": -77.06085,
-        "labelLat": -11.99694
+        "labelLat": -11.99694,
+        "genericLabel": "Cancha"
       }
     },
     {
@@ -5119,7 +5130,8 @@
         "kind": "landuse=brownfield",
         "geometryType": "area",
         "labelLng": -77.06,
-        "labelLat": -11.99634
+        "labelLat": -11.99634,
+        "genericLabel": "Construcción"
       }
     },
     {
@@ -5158,7 +5170,8 @@
         "kind": "amenity=parking",
         "geometryType": "area",
         "labelLng": -77.06208,
-        "labelLat": -11.99912
+        "labelLat": -11.99912,
+        "genericLabel": "Estacionamiento"
       }
     },
     {
@@ -5390,7 +5403,8 @@
         "geometryType": "area",
         "labelLng": -77.06105,
         "labelLat": -11.9989,
-        "name": "Campo deportivo"
+        "name": "Campo deportivo",
+        "genericLabel": "Cancha"
       }
     },
     {
@@ -5437,7 +5451,8 @@
         "kind": "amenity=parking",
         "geometryType": "area",
         "labelLng": -77.06197,
-        "labelLat": -12.00056
+        "labelLat": -12.00056,
+        "genericLabel": "Estacionamiento"
       }
     },
     {
@@ -6626,7 +6641,8 @@
         "kind": "leisure=garden",
         "geometryType": "area",
         "labelLng": -77.06002,
-        "labelLat": -12.00019
+        "labelLat": -12.00019,
+        "genericLabel": "Parque"
       }
     },
     {

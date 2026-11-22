@@ -51,6 +51,14 @@ it('keeps uncategorised buildings as neutral context', () => {
   expect(neutral[0].properties.kind).toBe('building=yes')
 })
 
+it('gives unnamed areas a generic label but not buildings', () => {
+  const fc = transformOverpass(sample as never)
+  const park = fc.features.find((f: Feature<Geometry, PlaceProps>) => f.properties.id === 'way/200')
+  const building = fc.features.find((f: Feature<Geometry, PlaceProps>) => f.properties.id === 'way/100')
+  expect(park?.properties.genericLabel).toBe('Parque')
+  expect(building?.properties.genericLabel).toBeUndefined()
+})
+
 it('formats ids as osm type and id, and types each geometry class', () => {
   const fc = transformOverpass(sample as never)
   expect(fc.features.map((f: Feature<Geometry, PlaceProps>) => f.properties.id).sort()).toEqual([

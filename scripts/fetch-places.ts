@@ -9,6 +9,7 @@ import { resolveCategory, type CategoryId } from '../src/categories'
 export interface PlaceProps {
   id: string
   name?: string
+  genericLabel?: string
   category: CategoryId | null
   kind: string
   geometryType: 'building' | 'area' | 'point'
@@ -151,6 +152,11 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
 
     if (tags.name) {
       props.name = tags.name
+    }
+    // Unnamed areas need something to render: parks, pitches, parking and
+    // construction sites fall back to their category's generic Spanish label.
+    if (placeGeometryType === 'area' && category?.genericLabel) {
+      props.genericLabel = category.genericLabel
     }
     if (levels !== undefined && !isNaN(levels)) {
       props.levels = levels
