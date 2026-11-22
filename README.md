@@ -4,7 +4,7 @@ A single-screen 3D landing page for the **SENATI Sede Principal** campus in San 
 
 - **Campus:** SENATI Sede Principal (Av. Alfredo Mendiola 3520, Independencia / San Martín de Porres, Lima)
 - **Plus Code:** `2W2Q+89 San Martín de Porres, Peru`
-- **Coordinates:** `[-77.0602, -11.9984]`
+- **Coordinates:** `[-77.0604, -11.999]` (centre of `src/data/campus.json`)
 
 The map fills the viewport with zero page scrolling. Places are loaded from committed OpenStreetMap GeoJSON data and styled with category-specific palette colours and 3D extrusions. Visitors can explore via two complementary camera modes: an overview **Top View** and an interactive first-person **Free View** with WASD walking controls.
 
@@ -57,16 +57,14 @@ The Overpass query queries nodes, ways, and relations within the campus bounding
 ```overpass
 [out:json][timeout:90];
 (
-  nwr["building"](-12.0010,-77.0635,-11.9960,-77.0570);
-  nwr["amenity"](-12.0010,-77.0635,-11.9960,-77.0570);
-  nwr["leisure"](-12.0010,-77.0635,-11.9960,-77.0570);
-  nwr["shop"](-12.0010,-77.0635,-11.9960,-77.0570);
-  nwr["tourism"](-12.0010,-77.0635,-11.9960,-77.0570);
-  nwr["landuse"](-12.0010,-77.0635,-11.9960,-77.0570);
+  nwr["building"](-12.0018,-77.0635,-11.9965,-77.0575);
+  nwr["amenity"](-12.0018,-77.0635,-11.9965,-77.0575);
+  nwr["shop"](-12.0018,-77.0635,-11.9965,-77.0575);
+  nwr["leisure"](-12.0018,-77.0635,-11.9965,-77.0575);
+  nwr["tourism"](-12.0018,-77.0635,-11.9965,-77.0575);
+  nwr["landuse"](-12.0018,-77.0635,-11.9965,-77.0575);
 );
-out body;
->;
-out skel qt;
+out geom;
 ```
 
 > **Note:** The Overpass server may take 30–90 seconds or occasionally rate-limit during peak hours. If it fails, retry after a few moments or pass a local JSON snapshot with `--from-file`.
@@ -114,15 +112,18 @@ Before deploying or after visual changes, verify the following in a desktop brow
 - [ ] **Free View navigation:**
   - Enters smoothly at the drone vantage facing the campus.
   - `W` / `A` / `S` / `D` moves forward, left, backward, right.
-  - `Q` / `E` pans camera left and right.
+  - `E` raises the eye height and `Q` lowers it.
   - Mouse look aims direction when pointer is locked.
   - `Esc` releases pointer lock.
   - Clicking empty canvas re-engages pointer lock.
+  - Switching back to Top View returns to the fitted campus frame; both mode buttons unlock afterwards.
+- [ ] **Resize:** Resizing the window keeps Top View fitted and Free View stable, with no page scrollbars at 1280×800, 1440×900 and 1920×1080.
 - [ ] **Feature hover & inspection:**
   - Hovering a place shows cursor pointer, white highlight fill/outline, and floating tooltip.
   - Clicking a place opens `InfoCard` dialog with category chip, title, metadata, and close button.
   - Unnamed parks show the generic label ("Parque"), not blank.
   - Unnamed buildings display cleanly with neutral colour.
+  - Every category colour is distinguishable on the dark basemap.
   - Pressing `Esc` closes `InfoCard` and restores focus to map canvas.
 - [ ] **Accessibility:**
   - Keyboard navigation: `Tab` cycles focus to Top/Free buttons and active controls with visible focus rings (`#5aa9e6`).
@@ -132,6 +133,19 @@ Before deploying or after visual changes, verify the following in a desktop brow
   - Enabling `prefers-reduced-transparency` disables backdrop blur filters.
 - [ ] **Error handling & recovery:**
   - When tile network requests fail or WebGL is disabled, the error overlay displays with an informative message and a functional "Retry" button.
+
+---
+
+## Deploying to Vercel
+
+The app is a static site; no API keys, environment variables or server functions are needed.
+
+- **Framework preset:** Vite
+- **Build command:** `pnpm build`
+- **Output directory:** `dist`
+- **Install command:** `pnpm install` (Vercel's default for a `pnpm-lock.yaml` repo)
+
+Deploy from the CLI with `pnpm dlx vercel --prod`, or import the repository in the Vercel dashboard with the settings above. After deployment, confirm the production URL shows the 3D map, the OpenFreeMap/OSM attribution, and both camera modes.
 
 ---
 
