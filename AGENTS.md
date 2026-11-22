@@ -8,8 +8,8 @@ A single-screen 3D landing page for the **SENATI Sede Principal** campus in San 
 Porres, Lima (plus code `2W2Q+89`). The map fills the viewport: no page scroll, two camera
 modes, and places coloured by category from OpenStreetMap data.
 
-**Current state:** the repo holds the design doc and the implementation plan. The app itself is
-built by following `PLAN.md` task by task.
+**Current state:** Block 1 of `PLAN.md` is implemented — app shell, campus bounds, category
+table, and committed place data. Blocks 2–5 (map layers, camera, UI, deploy) are still to build.
 
 ## Read first
 
@@ -20,8 +20,11 @@ If a change contradicts the spec, stop and raise it rather than silently divergi
 
 ## Stack
 
-Vite 8 · React 19 · TypeScript 7 · Tailwind CSS 4 · MapLibre GL JS 6 · Zustand 5 · Vitest 5.
+Vite 6 · React 19 · TypeScript 5.7 · Tailwind CSS 4 · MapLibre GL JS 5 · Zustand 5 · Vitest 3.
 Deployed as a static site on Vercel.
+
+These are the versions actually installed. The design doc names newer majors; do not upgrade a
+major just to match it — the camera API used here exists in MapLibre 5 and 6 alike.
 
 ## Commands
 
@@ -68,7 +71,7 @@ Pure logic lives apart from MapLibre calls so it can be unit tested in jsdom.
 
 ## Gotchas
 
-- **MapLibre 6 first-person API.** Free view uses `map.calculateCameraOptionsFromTo(...)` with
+- **MapLibre first-person API.** Free view uses `map.calculateCameraOptionsFromTo(...)` with
   `centerClampedToGround: false`, as in MapLibre's official first-person example. Verify the
   signature after install; fall back to `FreeCameraOptions` if it changed.
 - **WebGL cannot run in jsdom.** Test the maths and the reducers; verify rendering and camera
