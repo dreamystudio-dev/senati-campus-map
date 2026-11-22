@@ -1,5 +1,7 @@
 # SENATI Campus Map Implementation Plan
 
+> **Superseded (camera & modes):** the camera-mode, Free view, `maxBounds`, 15.5–19.5 top zoom and related a11y/QA sections below are historical. See `docs/superpowers/specs/2026-11-22-top-view-only-redesign-design.md` for the single-mode overview now in place.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A one-screen 3D landing page for the SENATI campus in San Martín de Porres, with category-coloured places, a top view, and a WASD first-person view.

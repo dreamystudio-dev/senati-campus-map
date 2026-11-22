@@ -1,5 +1,7 @@
 # SENATI Campus Map — Design
 
+> **Superseded (camera & modes):** the camera-mode, Free view, `maxBounds`, 15.5–19.5 top zoom and related a11y/QA sections below are historical. See `docs/superpowers/specs/2026-11-22-top-view-only-redesign-design.md` for the single-mode overview now in place.
+
 **Date:** 2026-11-21
 **Status:** draft, awaiting approval
 

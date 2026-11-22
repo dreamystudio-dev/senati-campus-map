@@ -5,17 +5,16 @@ Project guidance for AI agents and new contributors. Read this before touching c
 ## What this is
 
 A single-screen 3D landing page for the **SENATI Sede Principal** campus in San Martín de
-Porres, Lima (plus code `2W2Q+89`). The map fills the viewport: no page scroll, two camera
-modes, and places coloured by category from OpenStreetMap data.
+Porres, Lima (plus code `2W2Q+89`). The map fills the viewport: no page scroll, one always-on 3D
+campus overview, and places coloured by category from OpenStreetMap data.
 
-**Current state:** Blocks 1–2 of `PLAN.md` are implemented — app shell, bounds, categories,
-place data, map bootstrap, category layers, and hover/selection. Blocks 3–5 (camera, landing UI,
-deploy) are still to build.
+**Current state:** all blocks implemented, single-mode redesign applied.
 
 ## Read first
 
-- `docs/superpowers/specs/2026-11-21-campus-map-design.md` — the design source of truth.
-- `PLAN.md` — 16 tasks in 5 blocks, with exact files, interfaces and tests.
+- `docs/superpowers/specs/2026-11-22-top-view-only-redesign-design.md` — the design source of truth for the single-mode overview.
+- `docs/superpowers/specs/2026-11-21-campus-map-design.md` — historical design; its camera/mode sections are superseded.
+- `PLAN.md` — historical implementation plan; its camera/mode sections are superseded.
 
 If a change contradicts the spec, stop and raise it rather than silently diverging.
 
@@ -51,8 +50,9 @@ campus data or the category table changes, and commit the regenerated GeoJSON.
 - **Closed category table.** Unknown OSM tags are dropped at fetch time, never rendered.
   Uncategorised buildings are the one exception: they are kept with `category: null` and render
   neutral, so the campus keeps its 3D mass.
-- **Camera limits.** Top view: zoom 15.5–19.5, pitch 0–60°. Free view: eye 2–80 m, pitch ≤ 95°.
-- **Bounded map.** `maxBounds` is the campus box padded 10%; the camera cannot leave it.
+- **One camera: the overview.** No mode switch, no first-person view, no pointer lock.
+- **Camera limits.** Zoom 12–19.5, pitch 0–60°. Pan is unrestricted; `maxBounds` is not set.
+- **Inverted rotation.** Right-drag or Ctrl-drag turns the map opposite to MapLibre's default; vertical drag keeps native tilt.
 - **Fixed palette.** sky `#5aa9e6`, coral `#ef6f6c`, amber `#f2b134`, violet `#9b7ede`,
   lime `#8bc34a`, teal `#2ec4b6`, pink `#e56b9f`, bone `#e8e2d6`, orange `#f08a3c`,
   slate `#6b7a8f`.
@@ -66,26 +66,21 @@ campus data or the category table changes, and commit the regenerated GeoJSON.
 | `src/data/` | Committed `campus.json` and `places.geojson`. |
 | `scripts/fetch-places.ts` | One-off Overpass pull and transform. Pure `transformOverpass` is tested. |
 | `src/map/` | Map creation, style sanitising, layers, map options. |
-| `src/camera/` | Player state, input mapping, top view, free view, mode transitions. |
+| `src/camera/` | Inverted drag-rotation handler only. |
 | `src/places/` | Place description for tooltip and info card. |
 | `src/ui/` | Landing overlays. |
-| `src/store.ts` | Zustand app store: mode, lock, hover, selection, map status. |
+| `src/store.ts` | Zustand app store: hover, selection, map status. |
 
 Pure logic lives apart from MapLibre calls so it can be unit tested in jsdom.
 
 ## Gotchas
 
-- **MapLibre first-person API.** Free view uses `map.calculateCameraOptionsFromTo(...)` with
-  `centerClampedToGround: false`, as in MapLibre's official first-person example. Verify the
-  signature after install; fall back to `FreeCameraOptions` if it changed.
 - **WebGL cannot run in jsdom.** Test the maths and the reducers; verify rendering and camera
   feel by hand in a browser.
 - **Strip the basemap's own buildings and POIs.** OpenFreeMap Liberty ships `building*` and
   `poi*` layers that would double up with ours.
-- **One camera owner at a time.** Free view writes the camera every animation frame, so
-  `flyTo`/`easeTo` must not run concurrently.
-- **Pointer lock can be refused.** Free view falls back to drag-to-look when
-  `requestPointerLock` rejects.
+- **Rotation is a custom handler.** `dragRotate.disable()` is called and a canvas handler negates
+  the bearing delta; keep its sign and the 60° pitch cap in sync with `rotationDelta`.
 - **Heights are derived, not surveyed.** `building:levels × 3.2`, clamped 4–60 m. Do not claim
   precision.
 - **Unnamed areas need a label.** Parks, pitches, parking and construction fall back to a
