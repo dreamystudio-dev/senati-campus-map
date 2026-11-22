@@ -27,18 +27,40 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     height: rect.height || window.innerHeight || 800,
   }
 
-  const res = await fetch('https://tiles.openfreemap.org/styles/liberty')
-  if (!res.ok) {
-    throw new Error(`Failed to fetch basemap style: ${res.statusText}`)
+  let rawStyle: StyleSpecification
+  try {
+    const res = await fetch('https://tiles.openfreemap.org/styles/liberty')
+    if (!res.ok) {
+      throw new Error(`Failed to fetch basemap style: ${res.statusText}`)
+    }
+    rawStyle = (await res.json()) as StyleSpecification
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to fetch basemap style'
+    useAppStore.getState().setMapStatus('error', msg)
+    throw err
   }
-  const rawStyle = (await res.json()) as StyleSpecification
-  const style = sanitizeStyle(rawStyle)
 
+  const style = sanitizeStyle(rawStyle)
   const opts = mapOptions(viewport, container)
 
   const map = new Map({
     ...opts,
     style,
+  })
+
+  // Set map ready status on first idle
+  map.once('idle', () => {
+    if (useAppStore.getState().mapStatus !== 'error') {
+      useAppStore.getState().setMapStatus('ready')
+    }
+  })
+
+  // Watch for tile or style loading errors
+  map.on('error', (e: any) => {
+    // Check if error is related to missing tiles or critical failures
+    if (e?.error?.status === 404 || e?.error?.status === 500 || (!e?.sourceId && e?.error)) {
+      useAppStore.getState().setMapStatus('error', 'Basemap tiles or style failed to load.')
+    }
   })
 
   // The TileJSON already carries the OpenFreeMap/OSM attribution; adding a

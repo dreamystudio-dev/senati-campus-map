@@ -1,12 +1,15 @@
 import { create } from 'zustand'
 
 export type CameraMode = 'top' | 'free'
+export type MapStatus = 'loading' | 'ready' | 'error'
 
 interface AppState {
   mode: CameraMode
   locked: boolean
   lockRefused: boolean
   transitioning: boolean
+  mapStatus: MapStatus
+  mapError: string | null
   hoveredId: string | null
   selectedId: string | null
   hoverPosition: { x: number; y: number } | null
@@ -14,6 +17,7 @@ interface AppState {
   setLocked: (locked: boolean) => void
   setLockRefused: (refused: boolean) => void
   setTransitioning: (transitioning: boolean) => void
+  setMapStatus: (status: MapStatus, error?: string | null) => void
   setHovered: (id: string | null, position?: { x: number; y: number } | null) => void
   select: (id: string | null) => void
 }
@@ -23,6 +27,8 @@ export const useAppStore = create<AppState>((set) => ({
   locked: false,
   lockRefused: false,
   transitioning: false,
+  mapStatus: 'loading',
+  mapError: null,
   hoveredId: null,
   selectedId: null,
   hoverPosition: null,
@@ -47,6 +53,12 @@ export const useAppStore = create<AppState>((set) => ({
   setLockRefused: (lockRefused) => set({ lockRefused }),
 
   setTransitioning: (transitioning) => set({ transitioning }),
+
+  setMapStatus: (mapStatus, mapError = null) =>
+    set({
+      mapStatus,
+      mapError: mapStatus === 'error' ? (mapError || 'Map unavailable') : null,
+    }),
 
   setHovered: (id, position = null) =>
     set({

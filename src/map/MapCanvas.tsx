@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react'
+import { useEffect, useRef, useState, useImperativeHandle, forwardRef, useCallback } from 'react'
 import type { Map } from 'maplibre-gl'
 import { createMap, webglAvailable } from './createMap'
 import { fitCampus } from './options'
@@ -6,6 +6,8 @@ import { useTopView } from '../camera/useTopView'
 import { useFreeView } from '../camera/useFreeView'
 import type { PlayerRef } from '../camera/player'
 import { useAppStore } from '../store'
+import { LoadingOverlay } from '../ui/LoadingOverlay'
+import { ErrorOverlay } from '../ui/ErrorOverlay'
 
 export interface MapCanvasHandle {
   getMap: () => Map | null
@@ -24,7 +26,9 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
   const onMapLoadedRef = useRef(onMapLoaded)
   onMapLoadedRef.current = onMapLoaded
   const [mapInstance, setMapInstance] = useState<Map | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [mountKey, setMountKey] = useState(0)
+
+  const setMapStatus = useAppStore((state) => state.setMapStatus)
 
   useImperativeHandle(ref, () => ({
     getMap: () => mapInstance,
@@ -33,14 +37,20 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
   useTopView(mapInstance)
   useFreeView(mapInstance, mapInstance ? mapInstance.getCanvas() : null, playerRef)
 
+  const handleRetry = useCallback(() => {
+    setMapStatus('loading')
+    setMountKey((prev) => prev + 1)
+  }, [setMapStatus])
+
   useEffect(() => {
     if (!containerRef.current) return
 
     if (!webglAvailable()) {
-      setError('WebGL is not available in your browser or device.')
+      setMapStatus('error', 'WebGL is not available in your browser or device.')
       return
     }
 
+    setMapStatus('loading')
     let isCancelled = false
     let currentMap: Map | null = null
 
@@ -56,7 +66,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
       })
       .catch((err) => {
         if (!isCancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to initialize map.')
+          setMapStatus('error', err instanceof Error ? err.message : 'Failed to initialize map.')
         }
       })
 
@@ -87,22 +97,13 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function Ma
         setMapInstance(null)
       }
     }
-  }, [])
+  }, [mountKey, setMapStatus])
 
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} data-testid="map" className="w-full h-full" />
-      {error && (
-        <div
-          data-testid="map-error"
-          className="absolute inset-0 z-50 flex items-center justify-center bg-[#12151b]/90 text-white p-6"
-        >
-          <div className="p-4 rounded bg-[#1f242e] border border-red-500/40 text-center max-w-md">
-            <h2 className="text-lg font-semibold text-red-400 mb-2">Map Error</h2>
-            <p className="text-sm text-gray-300">{error}</p>
-          </div>
-        </div>
-      )}
+      <LoadingOverlay />
+      <ErrorOverlay onRetry={handleRetry} />
     </div>
   )
 })
