@@ -1,11 +1,11 @@
 import { Map, AttributionControl, type StyleSpecification, type MapMouseEvent } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { FeatureCollection } from 'geojson'
-import { CAMPUS, fitZoom, paddedBounds } from './bounds'
 import { sanitizeStyle } from './style'
 import { PLACES_SOURCE_ID, placesLayers } from './layers'
 import placesData from '../data/places.geojson'
 import { useAppStore } from '../store'
+import { mapOptions } from './options'
 
 export function webglAvailable(): boolean {
   try {
@@ -21,14 +21,10 @@ export function webglAvailable(): boolean {
 
 export async function createMap(container: HTMLElement): Promise<Map> {
   const rect = container.getBoundingClientRect()
-  const initialZoom = fitZoom(
-    CAMPUS.bounds,
-    {
-      width: rect.width || window.innerWidth || 1280,
-      height: rect.height || window.innerHeight || 800,
-    },
-    48,
-  )
+  const viewport = {
+    width: rect.width || window.innerWidth || 1280,
+    height: rect.height || window.innerHeight || 800,
+  }
 
   const res = await fetch('https://tiles.openfreemap.org/styles/liberty')
   if (!res.ok) {
@@ -37,22 +33,20 @@ export async function createMap(container: HTMLElement): Promise<Map> {
   const rawStyle = (await res.json()) as StyleSpecification
   const style = sanitizeStyle(rawStyle)
 
+  const opts = mapOptions(viewport, container)
+
   const map = new Map({
-    container,
+    ...opts,
     style,
-    center: CAMPUS.center,
-    zoom: initialZoom,
-    maxBounds: paddedBounds(CAMPUS.bounds, 0.1),
-    minZoom: 15.5,
-    maxZoom: 19.5,
-    maxPitch: 60,
-    renderWorldCopies: false,
-    attributionControl: false,
   })
 
-  // The OpenFreeMap TileJSON already carries the required attribution.
-  // Adding customAttribution here would print it twice.
-  map.addControl(new AttributionControl({ compact: false }))
+  map.addControl(
+    new AttributionControl({
+      compact: false,
+      customAttribution:
+        '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a>',
+    }),
+  )
 
   map.on('load', () => {
     // Add places GeoJSON source
@@ -75,9 +69,7 @@ export async function createMap(container: HTMLElement): Promise<Map> {
 
     const interactiveLayerIds = [
       'places-buildings',
-      'places-buildings-outline-volume',
       'places-areas-fill',
-      'places-areas-outline-tint',
       'places-points',
     ]
 
@@ -110,11 +102,6 @@ export async function createMap(container: HTMLElement): Promise<Map> {
         map.getCanvas().style.cursor = ''
         state.setHovered(null)
       }
-    })
-
-    map.on('mouseout', () => {
-      map.getCanvas().style.cursor = ''
-      useAppStore.getState().setHovered(null)
     })
 
     // Click selection

@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Map } from 'maplibre-gl'
 import { createMap, webglAvailable } from './createMap'
+import { fitCampus } from './options'
+import { useTopView } from '../camera/useTopView'
+import { useAppStore } from '../store'
 
 interface MapCanvasProps {
   onMapLoaded?: (map: Map) => void
@@ -8,13 +11,10 @@ interface MapCanvasProps {
 
 export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const mapRef = useRef<Map | null>(null)
-  const onMapLoadedRef = useRef(onMapLoaded)
+  const [mapInstance, setMapInstance] = useState<Map | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // Keep the latest callback without re-running the effect, which would
-  // tear down and rebuild the map on every parent render.
-  onMapLoadedRef.current = onMapLoaded
+  useTopView(mapInstance)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -25,6 +25,7 @@ export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
     }
 
     let isCancelled = false
+    let currentMap: Map | null = null
 
     createMap(containerRef.current)
       .then((map) => {
@@ -32,8 +33,9 @@ export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
           map.remove()
           return
         }
-        mapRef.current = map
-        onMapLoadedRef.current?.(map)
+        currentMap = map
+        setMapInstance(map)
+        onMapLoaded?.(map)
       })
       .catch((err) => {
         if (!isCancelled) {
@@ -41,14 +43,34 @@ export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
         }
       })
 
-    return () => {
-      isCancelled = true
-      if (mapRef.current) {
-        mapRef.current.remove()
-        mapRef.current = null
+    // ResizeObserver: re-fit when mode is top, otherwise just resize
+    const resizeObserver = new ResizeObserver(() => {
+      if (!currentMap) return
+      currentMap.resize()
+      if (useAppStore.getState().mode === 'top') {
+        fitCampus(currentMap)
+      }
+    })
+
+    resizeObserver.observe(containerRef.current)
+
+    const onWindowResize = () => {
+      if (currentMap) {
+        currentMap.resize()
       }
     }
-  }, [])
+    window.addEventListener('resize', onWindowResize)
+
+    return () => {
+      isCancelled = true
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', onWindowResize)
+      if (currentMap) {
+        currentMap.remove()
+        setMapInstance(null)
+      }
+    }
+  }, [onMapLoaded])
 
   return (
     <div className="relative w-full h-full">
