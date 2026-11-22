@@ -38,6 +38,10 @@ beforeEach(() => {
   })
 })
 
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
 it('relaxes the camera caps before easing into free view', () => {
   const { map } = recordingMap()
   const playerRef = { current: { x: 0, y: 0, heading: 0, eyeM: 2, pitchDeg: 0 } }
@@ -128,6 +132,39 @@ it('ignores a second switch while a transition is in flight', () => {
 
   expect(map.once).toHaveBeenCalledTimes(1)
   expect(map.easeTo).toHaveBeenCalledTimes(1)
+})
+
+it('completes a reduced-motion switch when moveend fires inside easeTo', () => {
+  // MapLibre calls finish() synchronously for duration 0, so moveend happens
+  // before a listener registered after easeTo() could ever observe it.
+  let moveEnd: (() => void) | null = null
+  const map = {
+    easeTo: vi.fn((options: { duration?: number }) => {
+      if (options.duration === 0) moveEnd?.()
+    }),
+    jumpTo: vi.fn(),
+    once: vi.fn((event: string, cb: () => void) => {
+      if (event === 'moveend') moveEnd = cb
+    }),
+    getContainer: () => ({ getBoundingClientRect: () => ({ width: 1280, height: 800 }) }),
+    setMinZoom: vi.fn(),
+    setMaxZoom: vi.fn(),
+    setMaxPitch: vi.fn(),
+    setCenterClampedToGround: vi.fn(),
+    getCanvas: () => fakeCanvas(),
+  }
+  vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: true })))
+  const playerRef: { current: Player } = {
+    current: { x: 0, y: 0, heading: 0, eyeM: 2, pitchDeg: 0 },
+  }
+  const { result } = renderHook(() => useModeTransition(map as never, playerRef))
+
+  act(() => result.current.switchTo('free'))
+
+  expect(map.easeTo).toHaveBeenCalledWith(expect.objectContaining({ duration: 0 }))
+  expect(useAppStore.getState().mode).toBe('free')
+  expect(useAppStore.getState().transitioning).toBe(false)
+  expect(playerRef.current.eyeM).toBe(25)
 })
 
 it('eases zoom to the fitted top view without a jump at moveend', () => {

@@ -49,8 +49,8 @@ export function useModeTransition(map: Map | null, playerRef: PlayerRef): {
       window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
     const duration = prefersReducedMotion ? 0 : 1200
 
-    map.easeTo({ ...plan, duration })
-
+    // MapLibre fires moveend synchronously for duration 0 (reduced motion), so
+    // the listener must exist before easeTo starts or the switch never finishes.
     map.once('moveend', () => {
       setTransitioning(false)
       setMode(nextMode)
@@ -67,6 +67,8 @@ export function useModeTransition(map: Map | null, playerRef: PlayerRef): {
         }
       }
     })
+
+    map.easeTo({ ...plan, duration })
   }
 
   // Handle Escape key to unlock pointer
