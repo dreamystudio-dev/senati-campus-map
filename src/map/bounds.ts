@@ -11,13 +11,6 @@ export interface CampusInfo {
 
 export const CAMPUS: CampusInfo = campusData as CampusInfo
 
-export function paddedBounds(bounds: Bounds, ratio: number): Bounds {
-  const [w, s, e, n] = bounds
-  const dx = (e - w) * ratio
-  const dy = (n - s) * ratio
-  return [w - dx, s - dy, e + dx, n + dy]
-}
-
 export function fitZoom(
   bounds: Bounds,
   viewport: { width: number; height: number },
@@ -44,5 +37,5 @@ export function fitZoom(
 
   const zoom = Math.min(zoomX, zoomY)
 
-  return Math.min(19.5, Math.max(15.5, Number(zoom.toFixed(4))))
+  return Math.min(19.5, Math.max(12, Number(zoom.toFixed(4))))
 }
