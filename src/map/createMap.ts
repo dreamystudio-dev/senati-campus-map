@@ -1,7 +1,10 @@
 import { Map, AttributionControl, type StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import type { FeatureCollection } from 'geojson'
 import { CAMPUS, fitZoom, paddedBounds } from './bounds'
 import { sanitizeStyle } from './style'
+import { PLACES_SOURCE_ID, placesLayers } from './layers'
+import placesData from '../data/places.geojson'
 
 export function webglAvailable(): boolean {
   try {
@@ -49,9 +52,42 @@ export async function createMap(container: HTMLElement): Promise<Map> {
   map.addControl(
     new AttributionControl({
       compact: false,
-      customAttribution: '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a>',
+      customAttribution:
+        '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a>',
     }),
   )
+
+  map.on('load', () => {
+    // Add places GeoJSON source
+    if (!map.getSource(PLACES_SOURCE_ID)) {
+      map.addSource(PLACES_SOURCE_ID, {
+        type: 'geojson',
+        data: placesData as FeatureCollection,
+      })
+    }
+
+    // Find the first symbol layer in the basemap to place our layers before (or add at top)
+    const layers = map.getStyle().layers || []
+    let firstSymbolId: string | undefined
+    for (const l of layers) {
+      if (l.type === 'symbol') {
+        firstSymbolId = l.id
+        break
+      }
+    }
+
+    for (const layer of placesLayers()) {
+      if (!map.getLayer(layer.id)) {
+        if (layer.id === 'places-labels') {
+          // Add labels on top of everything
+          map.addLayer(layer)
+        } else {
+          // Add geometries before basemap symbol labels
+          map.addLayer(layer, firstSymbolId)
+        }
+      }
+    }
+  })
 
   return map
 }
