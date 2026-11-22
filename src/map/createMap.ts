@@ -1,10 +1,11 @@
-import { Map, AttributionControl, type StyleSpecification } from 'maplibre-gl'
+import { Map, AttributionControl, type StyleSpecification, type MapMouseEvent } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { FeatureCollection } from 'geojson'
 import { CAMPUS, fitZoom, paddedBounds } from './bounds'
 import { sanitizeStyle } from './style'
 import { PLACES_SOURCE_ID, placesLayers } from './layers'
 import placesData from '../data/places.geojson'
+import { useAppStore } from '../store'
 
 export function webglAvailable(): boolean {
   try {
@@ -76,17 +77,61 @@ export async function createMap(container: HTMLElement): Promise<Map> {
       }
     }
 
+    const interactiveLayerIds = [
+      'places-buildings',
+      'places-areas-fill',
+      'places-points',
+    ]
+
     for (const layer of placesLayers()) {
       if (!map.getLayer(layer.id)) {
         if (layer.id === 'places-labels') {
-          // Add labels on top of everything
           map.addLayer(layer)
         } else {
-          // Add geometries before basemap symbol labels
           map.addLayer(layer, firstSymbolId)
         }
       }
     }
+
+    // Hover interactions
+    map.on('mousemove', (e: MapMouseEvent) => {
+      const state = useAppStore.getState()
+      if (state.mode === 'free' && state.locked) return
+
+      const bboxSize = 6
+      const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
+        [e.point.x - bboxSize, e.point.y - bboxSize],
+        [e.point.x + bboxSize, e.point.y + bboxSize],
+      ]
+      const features = map.queryRenderedFeatures(bbox, { layers: interactiveLayerIds })
+
+      if (features.length > 0 && features[0].properties?.id) {
+        map.getCanvas().style.cursor = 'pointer'
+        state.setHovered(features[0].properties.id, { x: e.originalEvent.clientX, y: e.originalEvent.clientY })
+      } else {
+        map.getCanvas().style.cursor = ''
+        state.setHovered(null)
+      }
+    })
+
+    // Click selection
+    map.on('click', (e: MapMouseEvent) => {
+      const state = useAppStore.getState()
+      if (state.mode === 'free' && state.locked) return
+
+      const bboxSize = 6
+      const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
+        [e.point.x - bboxSize, e.point.y - bboxSize],
+        [e.point.x + bboxSize, e.point.y + bboxSize],
+      ]
+      const features = map.queryRenderedFeatures(bbox, { layers: interactiveLayerIds })
+
+      if (features.length > 0 && features[0].properties?.id) {
+        state.select(features[0].properties.id)
+      } else {
+        state.select(null)
+      }
+    })
   })
 
   return map
