@@ -10,6 +10,8 @@ const LAYER_IDS = [
   'places-areas-outline-tint',
   'places-areas-outline',
   'places-points',
+  'places-hover-fill',
+  'places-hover-line',
   'places-labels',
 ]
 
@@ -55,4 +57,10 @@ it('labels named features and unnamed areas with the basemap font', () => {
   expect(text).toContain('genericLabel')
   expect(JSON.stringify(labels.filter)).toContain('genericLabel')
   expect(labels.layout['text-font']).toEqual(BASEMAP_FONT)
+})
+
+it('adds a hover highlight above the place layers', () => {
+  const ids = placesLayers().map((l) => l.id)
+  expect(ids).toContain('places-hover-fill')
+  expect(ids).toContain('places-hover-line')
 })

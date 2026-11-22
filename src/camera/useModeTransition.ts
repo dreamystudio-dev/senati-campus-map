@@ -44,7 +44,12 @@ export function useModeTransition(map: Map | null, playerRef: PlayerRef): {
       })
     }
 
-    map.easeTo({ ...plan, duration: 1200 })
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+    const duration = prefersReducedMotion ? 0 : 1200
+
+    map.easeTo({ ...plan, duration })
 
     map.once('moveend', () => {
       setTransitioning(false)

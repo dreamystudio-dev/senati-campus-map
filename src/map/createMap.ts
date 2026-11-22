@@ -2,7 +2,7 @@ import { Map, AttributionControl, type StyleSpecification, type MapMouseEvent } 
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { FeatureCollection } from 'geojson'
 import { sanitizeStyle } from './style'
-import { PLACES_SOURCE_ID, placesLayers } from './layers'
+import { PLACES_SOURCE_ID, HOVER_SOURCE_ID, placesLayers } from './layers'
 import placesData from '../data/places.geojson'
 import { useAppStore } from '../store'
 import { mapOptions } from './options'
@@ -75,6 +75,38 @@ export async function createMap(container: HTMLElement): Promise<Map> {
         data: placesData as FeatureCollection,
       })
     }
+
+    if (!map.getSource(HOVER_SOURCE_ID)) {
+      map.addSource(HOVER_SOURCE_ID, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      })
+    }
+
+    // Keep hover source in sync with store
+    const updateHoverSource = (hoveredId: string | null) => {
+      const hoverSource = map.getSource(HOVER_SOURCE_ID) as any
+      if (!hoverSource) return
+      if (!hoveredId) {
+        hoverSource.setData({ type: 'FeatureCollection', features: [] })
+        return
+      }
+      const feature = (placesData as FeatureCollection).features.find(
+        (f) => f.properties?.id === hoveredId,
+      )
+      hoverSource.setData({
+        type: 'FeatureCollection',
+        features: feature ? [feature] : [],
+      })
+    }
+
+    let prevHoveredId = useAppStore.getState().hoveredId
+    useAppStore.subscribe((state) => {
+      if (state.hoveredId !== prevHoveredId) {
+        prevHoveredId = state.hoveredId
+        updateHoverSource(prevHoveredId)
+      }
+    })
 
     // Find the first symbol layer in the basemap to place our layers before (or add at top)
     const layers = map.getStyle().layers || []

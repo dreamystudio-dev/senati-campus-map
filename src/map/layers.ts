@@ -2,6 +2,7 @@ import type { ExpressionSpecification, FilterSpecification, LayerSpecification }
 import { CATEGORIES, type CategoryId } from '../categories'
 
 export const PLACES_SOURCE_ID = 'places'
+export const HOVER_SOURCE_ID = 'places-hover'
 
 // OpenFreeMap's glyph server only hosts the fonts its own styles use.
 // Omitting text-font makes MapLibre ask for "Open Sans Regular", which 404s.
@@ -72,8 +73,6 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-buildings',
       type: 'fill-extrusion',
       source: PLACES_SOURCE_ID,
-      // fill-extrusion-opacity cannot be a data expression, so solid and
-      // outline-style buildings need separate layers.
       filter: ['all', geometryIs('building'), ['!', categoryIn(OUTLINE_IDS)]] as FilterSpecification,
       paint: {
         'fill-extrusion-color': buildingColorExpression(),
@@ -150,11 +149,28 @@ export function placesLayers(): LayerSpecification[] {
       },
     },
     {
+      id: 'places-hover-fill',
+      type: 'fill',
+      source: HOVER_SOURCE_ID,
+      paint: {
+        'fill-color': '#ffffff',
+        'fill-opacity': 0.18,
+      },
+    },
+    {
+      id: 'places-hover-line',
+      type: 'line',
+      source: HOVER_SOURCE_ID,
+      paint: {
+        'line-color': '#ffffff',
+        'line-width': 1.5,
+        'line-opacity': 0.9,
+      },
+    },
+    {
       id: 'places-labels',
       type: 'symbol',
       source: PLACES_SOURCE_ID,
-      // Unnamed buildings and points get colour but no label. Unnamed areas
-      // carry a genericLabel from the fetch step, so parks and pitches read.
       filter: ['any', ['has', 'name'], ['has', 'genericLabel']] as FilterSpecification,
       layout: {
         'text-field': ['coalesce', ['get', 'name'], ['get', 'genericLabel']],
@@ -163,7 +179,6 @@ export function placesLayers(): LayerSpecification[] {
         'text-anchor': 'top',
         'text-offset': [0, 0.6],
         'text-optional': true,
-        // Named places win collisions against generic area labels.
         'symbol-sort-key': ['case', ['has', 'name'], 0, 1],
       },
       paint: {
