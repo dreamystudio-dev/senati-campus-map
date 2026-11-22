@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react'
 import type { Map } from 'maplibre-gl'
 import { createMap, webglAvailable } from './createMap'
 import { fitCampus } from './options'
@@ -6,14 +6,25 @@ import { useTopView } from '../camera/useTopView'
 import { useFreeView } from '../camera/useFreeView'
 import { useAppStore } from '../store'
 
+export interface MapCanvasHandle {
+  getMap: () => Map | null
+}
+
 interface MapCanvasProps {
   onMapLoaded?: (map: Map) => void
 }
 
-export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
+export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas(
+  { onMapLoaded },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [mapInstance, setMapInstance] = useState<Map | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  useImperativeHandle(ref, () => ({
+    getMap: () => mapInstance,
+  }))
 
   useTopView(mapInstance)
   useFreeView(mapInstance, mapInstance ? mapInstance.getCanvas() : null)
@@ -90,4 +101,4 @@ export function MapCanvas({ onMapLoaded }: MapCanvasProps) {
       )}
     </div>
   )
-}
+})

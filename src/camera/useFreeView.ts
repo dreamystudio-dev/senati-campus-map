@@ -3,22 +3,25 @@ import { LngLat, type Map } from 'maplibre-gl'
 import { useAppStore } from '../store'
 import { inputFromKeys, type KeyState } from './input'
 import { stepPlayer, turn, eyeAndAhead, type Player } from './player'
+import { FREE_VANTAGE } from './transition'
 
 export function useFreeView(map: Map | null, canvas: HTMLCanvasElement | null): void {
   const mode = useAppStore((state) => state.mode)
   const locked = useAppStore((state) => state.locked)
+  const transitioning = useAppStore((state) => state.transitioning)
   const setLocked = useAppStore((state) => state.setLocked)
 
   const playerRef = useRef<Player>({
     x: 0,
     y: 0,
     heading: 0,
-    eyeM: 25,
+    eyeM: FREE_VANTAGE.eyeM,
     pitchDeg: 0,
   })
 
   const keysRef = useRef<KeyState>({})
   const lastTimeRef = useRef<number | null>(null)
+  const isDraggingRef = useRef(false)
 
   // Disable standard map handlers while free view is active
   useEffect(() => {
@@ -42,7 +45,7 @@ export function useFreeView(map: Map | null, canvas: HTMLCanvasElement | null): 
   // Track keyboard events
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (mode !== 'free') return
+      if (mode !== 'free' || transitioning) return
       keysRef.current[e.code] = true
     }
 
@@ -59,9 +62,9 @@ export function useFreeView(map: Map | null, canvas: HTMLCanvasElement | null): 
       window.removeEventListener('keyup', onKeyUp)
       keysRef.current = {}
     }
-  }, [mode])
+  }, [mode, transitioning])
 
-  // Track mouse movement and pointer lock
+  // Track mouse movement, pointer lock, and drag-to-look fallback
   useEffect(() => {
     if (!canvas) return
 
@@ -70,26 +73,50 @@ export function useFreeView(map: Map | null, canvas: HTMLCanvasElement | null): 
       setLocked(isLocked)
     }
 
-    const onMouseMove = (e: MouseEvent) => {
-      if (mode !== 'free' || !useAppStore.getState().locked) return
-      const deltaYawDeg = -e.movementX * 0.12
-      const deltaPitchDeg = -e.movementY * 0.12
+    const onPointerLockError = () => {
+      setLocked(false)
+    }
 
-      playerRef.current = turn(playerRef.current, deltaYawDeg, deltaPitchDeg)
+    const onMouseDown = (e: MouseEvent) => {
+      if (mode !== 'free' || locked) return
+      if (e.button === 0) {
+        isDraggingRef.current = true
+      }
+    }
+
+    const onMouseUp = () => {
+      isDraggingRef.current = false
+    }
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (mode !== 'free' || transitioning) return
+
+      // Look is active if pointer is locked OR user is dragging (fallback)
+      if (locked || isDraggingRef.current) {
+        const deltaYawDeg = -e.movementX * 0.12
+        const deltaPitchDeg = -e.movementY * 0.12
+        playerRef.current = turn(playerRef.current, deltaYawDeg, deltaPitchDeg)
+      }
     }
 
     document.addEventListener('pointerlockchange', onPointerLockChange)
+    document.addEventListener('pointerlockerror', onPointerLockError)
+    window.addEventListener('mousedown', onMouseDown)
+    window.addEventListener('mouseup', onMouseUp)
     window.addEventListener('mousemove', onMouseMove)
 
     return () => {
       document.removeEventListener('pointerlockchange', onPointerLockChange)
+      document.removeEventListener('pointerlockerror', onPointerLockError)
+      window.removeEventListener('mousedown', onMouseDown)
+      window.removeEventListener('mouseup', onMouseUp)
       window.removeEventListener('mousemove', onMouseMove)
     }
-  }, [canvas, mode, setLocked])
+  }, [canvas, mode, locked, transitioning, setLocked])
 
   // requestAnimationFrame loop
   useEffect(() => {
-    if (!map || mode !== 'free' || !locked) {
+    if (!map || mode !== 'free' || transitioning) {
       lastTimeRef.current = null
       return
     }
@@ -104,6 +131,7 @@ export function useFreeView(map: Map | null, canvas: HTMLCanvasElement | null): 
       lastTimeRef.current = time
       const dt = Math.min(0.05, Math.max(0.001, rawDt))
 
+      // Only move if locked or if keyboard input is active
       const input = inputFromKeys(keysRef.current)
       playerRef.current = stepPlayer(playerRef.current, input, dt)
 
@@ -132,5 +160,5 @@ export function useFreeView(map: Map | null, canvas: HTMLCanvasElement | null): 
       cancelAnimationFrame(animId)
       lastTimeRef.current = null
     }
-  }, [map, mode, locked])
+  }, [map, mode, transitioning])
 }
