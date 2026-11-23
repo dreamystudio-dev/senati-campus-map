@@ -6,12 +6,14 @@ Project guidance for AI agents and new contributors. Read this before touching c
 
 A single-screen 3D landing page for the **SENATI Sede Principal** campus in San Martín de
 Porres, Lima (plus code `2W2Q+89`). The map fills the viewport: no page scroll, one always-on 3D
-campus overview, and places drawn as flat category-coloured borders from OpenStreetMap data.
+campus overview, and places drawn as category-coloured dots from OpenStreetMap data. Hovering a
+dot reveals its footprint and a name/type tooltip.
 
-**Current state:** all blocks implemented, single-mode flat overview applied.
+**Current state:** all blocks implemented, hover-only place dots with a category legend.
 
 ## Read first
 
+- `docs/superpowers/specs/2026-11-23-hover-only-tooltip-and-category-trim-design.md` — the design source of truth for the hover-only tooltip and category table.
 - `docs/superpowers/specs/2026-11-22-flat-outlines-and-english-design.md` — the design source of truth for the flat English overview.
 - `docs/superpowers/specs/2026-11-22-top-view-only-redesign-design.md` — historical design; its camera/mode sections are still authoritative for the single overview.
 - `docs/superpowers/specs/2026-11-21-campus-map-design.md` — historical design; its camera/mode sections are superseded.
@@ -48,13 +50,15 @@ campus data or the category table changes, and commit the regenerated GeoJSON.
 - **The page never scrolls.** Root element is `h-dvh overflow-hidden`.
 - **Static hosting only.** No API keys, no environment variables, no server functions.
 - **No runtime Overpass calls.** `src/data/places.geojson` is committed.
-- **Closed category table.** Unknown OSM tags are dropped at fetch time, never rendered.
-  Uncategorised buildings are the one exception: they are kept with `category: null` as neutral
-  flat outlines for context, with no label, tooltip, info card or pointer cursor.
-- **Flat buildings.** Categorised buildings are 3 px footprint borders in their category colour.
-  There are no fill-extrusion layers. Hovering a markerable place fills it with its border colour
-  at 35% opacity; the resting map has no building fill.
-- **No controls card.** The map is self-explanatory; do not reintroduce the panel or copy module.
+- **Closed category table.** Unknown OSM tags are dropped at fetch time, never rendered. The
+  eleven categories are education, food, market, shop, park, sport, worship, finance, health,
+  community and entertainment. Only `park` and `sport` have generic labels (`Park` and `Pitch`).
+  Only features with an OSM `name` or a category `genericLabel` are kept; everything else is
+  dropped at fetch time.
+- **Flat buildings.** Buildings are not drawn at rest. Hovering a place dot fills its footprint
+  with the category colour at 35 % opacity and draws a thin outline; there are no fill-extrusion
+  layers.
+- **No controls card.** The bottom-left category legend is the only controls panel.
 - **One camera: the overview.** No mode switch, no first-person view, no pointer lock.
 - **Camera limits.** Zoom 12–19.5, pitch 0–60°. Pan is unrestricted; `maxBounds` is not set.
 - **Inverted rotation.** Right-drag or Ctrl-drag turns the map opposite to MapLibre's default at
@@ -73,9 +77,9 @@ campus data or the category table changes, and commit the regenerated GeoJSON.
 | `scripts/fetch-places.ts` | One-off Overpass pull and transform. Pure `transformOverpass` is tested. |
 | `src/map/` | Map creation, style sanitising, layers, map options. |
 | `src/camera/` | Inverted drag-rotation handler only. |
-| `src/places/` | Place description for tooltip and info card. |
+| `src/places/` | Place description for the hover tooltip. |
 | `src/ui/` | Landing overlays. |
-| `src/store.ts` | Zustand app store: hover, selection, map status. |
+| `src/store.ts` | Zustand app store: hover, category visibility, map status. |
 
 Pure logic lives apart from MapLibre calls so it can be unit tested in jsdom.
 
@@ -89,10 +93,8 @@ Pure logic lives apart from MapLibre calls so it can be unit tested in jsdom.
   MapLibre's centre-dependent bearing math, negates the bearing and scales it by 0.5. Tilt keeps
   its native sign and clamps to `map.getMaxPitch()`.
 - **Heights are derived, not surveyed.** `building:levels × 3.2`, clamped 4–60 m. They are
-  informational only: buildings render as flat footprints. Do not claim precision.
-- **Unnamed areas need a label.** Parks, pitches, parking and construction fall back to the
-  English labels `Park`, `Pitch`, `Parking` and `Construction`. Uncategorised context buildings
-  and points get no label.
+  informational only: footprints render on hover. Do not claim precision.
+- **No `Unnamed …` places.** The fetch drops any feature with neither a name nor a generic label.
 
 ## Conventions
 
