@@ -11,6 +11,11 @@ export type CategoryId =
   | 'art'
   | 'parking'
   | 'construction'
+  | 'health'
+  | 'community'
+  | 'transit'
+  | 'entertainment'
+  | 'facilities'
 
 export type MarkStyle = 'fill' | 'outline'
 
@@ -30,7 +35,7 @@ export const CATEGORIES: Category[] = [
     color: '#5aa9e6', // sky
     style: 'outline',
     matches: (tags) =>
-      ['college', 'university', 'school', 'kindergarten'].includes(tags.amenity) ||
+      ['college', 'university', 'school', 'kindergarten', 'prep_school'].includes(tags.amenity) ||
       tags.office === 'educational_institution',
   },
   {
@@ -39,7 +44,7 @@ export const CATEGORIES: Category[] = [
     color: '#ef6f6c', // coral
     style: 'fill',
     matches: (tags) =>
-      ['cafe', 'restaurant', 'fast_food', 'bar'].includes(tags.amenity),
+      ['cafe', 'restaurant', 'fast_food', 'bar', 'ice_cream', 'food_court'].includes(tags.amenity),
   },
   {
     id: 'market',
@@ -69,7 +74,7 @@ export const CATEGORIES: Category[] = [
     color: '#2ec4b6', // teal
     style: 'outline',
     genericLabel: 'Pitch',
-    matches: (tags) => ['pitch', 'sports_centre', 'stadium'].includes(tags.leisure),
+    matches: (tags) => ['pitch', 'sports_centre', 'stadium', 'recreation_ground'].includes(tags.leisure),
   },
   {
     id: 'worship',
@@ -114,6 +119,47 @@ export const CATEGORIES: Category[] = [
     style: 'outline',
     genericLabel: 'Construction',
     matches: (tags) => ['construction', 'brownfield'].includes(tags.landuse),
+  },
+  {
+    id: 'health',
+    label: 'Health',
+    color: '#2ec4b6', // teal
+    style: 'fill',
+    matches: (tags) =>
+      ['pharmacy', 'veterinary', 'clinic', 'hospital', 'doctors', 'dentist'].includes(tags.amenity),
+  },
+  {
+    id: 'community',
+    label: 'Community',
+    color: '#5aa9e6', // sky
+    style: 'outline',
+    matches: (tags) =>
+      ['post_office', 'courthouse', 'library', 'community_centre', 'townhall'].includes(tags.amenity) ||
+      tags.tourism === 'information',
+  },
+  {
+    id: 'transit',
+    label: 'Transit',
+    color: '#6b7a8f', // slate
+    style: 'fill',
+    matches: (tags) => tags.amenity === 'bus_station' || tags.public_transport === 'station',
+  },
+  {
+    id: 'entertainment',
+    label: 'Entertainment',
+    color: '#9b7ede', // violet
+    style: 'fill',
+    matches: (tags) =>
+      ['cinema', 'theatre', 'nightclub', 'casino'].includes(tags.amenity) ||
+      tags.tourism === 'theme_park' ||
+      tags.leisure === 'dance',
+  },
+  {
+    id: 'facilities',
+    label: 'Facilities',
+    color: '#f2b134', // amber
+    style: 'outline',
+    matches: (tags) => ['toilets', 'charging_station', 'fountain', 'drinking_water'].includes(tags.amenity),
   },
 ]
 
