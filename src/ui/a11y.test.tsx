@@ -17,7 +17,7 @@ it('closes InfoCard on Escape and returns focus to map canvas', async () => {
   canvas.tabIndex = 0
   document.body.appendChild(canvas)
 
-  useAppStore.getState().select('relation/21864174')
+  useAppStore.getState().select('way/440258367')
   const { unmount } = render(<InfoCard />)
 
   expect(screen.getByRole('dialog')).toBeInTheDocument()

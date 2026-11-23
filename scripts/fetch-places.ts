@@ -5,9 +5,8 @@ import osmtogeojson from 'osmtogeojson'
 import polylabel from '@mapbox/polylabel'
 import type { Feature, FeatureCollection, Geometry, Polygon, MultiPolygon, Point, Position } from 'geojson'
 import { resolveCategory, type CategoryId } from '../src/categories'
-import { CAMPUS } from '../src/map/bounds'
 
-export const PLACES_BBOX = '-12.00361,-77.06533,-11.99469,-77.05567'
+export const PLACES_BBOX = '-12.0053,-77.0674,-11.9927,-77.0534'
 
 export interface PlaceProps {
   id: string
@@ -18,6 +17,7 @@ export interface PlaceProps {
   geometryType: 'building' | 'area' | 'point'
   levels?: number
   heightM?: number
+  footprintId?: string
   labelLng: number
   labelLat: number
   [key: string]: unknown
@@ -156,9 +156,9 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
     const tags: Record<string, string> = (feature.properties?.tags || feature.properties || {})
     const category = resolveCategory(tags)
     const isBuilding = Boolean(tags.building && tags.building !== 'no')
-    // Uncategorised buildings are kept as neutral context: they give the campus
-    // its 3D mass. Uncategorised areas and points are filler and are dropped.
-    if (!category && !isBuilding) continue
+    // Only categorised visitable places are rendered; uncategorised features
+    // are dropped at fetch time.
+    if (!category) continue
 
     // Determine geometryType
     const geomType = feature.geometry.type
@@ -230,6 +230,22 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
       geometry: roundCoords(feature.geometry),
       properties: props,
     })
+
+    // Every polygon place is discovered as a dot; its footprint stays in the
+    // data and is revealed only when that dot is selected.
+    if (geomType === 'Polygon' || geomType === 'MultiPolygon') {
+      features.push({
+        type: 'Feature',
+        id: `${id}/point`,
+        geometry: { type: 'Point', coordinates: [round5(labelLng), round5(labelLat)] },
+        properties: {
+          ...props,
+          id: `${id}/point`,
+          geometryType: 'point',
+          footprintId: id,
+        },
+      })
+    }
   }
 
   return {
@@ -294,15 +310,6 @@ out geom;`
 
   console.log(`Fetched ${data.elements?.length || 0} elements. Transforming...`)
   const fc = transformOverpass(data)
-
-  // Only nearby buildings and areas are in scope for the wider fetch. POI dots
-  // stay limited to the original campus frame so the marker set does not grow.
-  const [west, south, east, north] = CAMPUS.bounds
-  fc.features = fc.features.filter((feature) => {
-    if (feature.properties.geometryType !== 'point') return true
-    const { labelLng: lng, labelLat: lat } = feature.properties
-    return lng >= west && lng <= east && lat >= south && lat <= north
-  })
 
   const counts: Record<string, number> = {}
   for (const f of fc.features) {
