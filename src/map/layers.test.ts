@@ -1,11 +1,18 @@
 // src/map/layers.test.ts
 import { featureFilter } from '@maplibre/maplibre-gl-style-spec'
+import { vi } from 'vitest'
 import { CATEGORIES } from '../categories'
-import { BASEMAP_FONT, categoryColorExpression, INTERACTIVE_LAYER_IDS, placesLayers } from './layers'
+import {
+  applyLayerFilters,
+  BASEMAP_FONT,
+  categoryColorExpression,
+  INTERACTIVE_LAYER_IDS,
+  layerFilters,
+  placesLayers,
+} from './layers'
 
 const LAYER_IDS = [
   'places-buildings',
-  'places-buildings-context',
   'places-areas-fill',
   'places-areas-outline-tint',
   'places-areas-outline',
@@ -28,38 +35,108 @@ it('maps every category colour into the expression', () => {
 it('renders every building as a flat border, never a filled volume', () => {
   const layers = placesLayers()
   expect(layers.some((l) => l.type === 'fill-extrusion')).toBe(false)
-  for (const id of ['places-buildings', 'places-buildings-context']) {
-    expect(layers.find((l) => l.id === id)?.type).toBe('line')
-  }
+  expect(layers.find((l) => l.id === 'places-buildings')?.type).toBe('line')
 })
 
-it('draws context buildings in neutral slate', () => {
-  const layer = placesLayers().find((l) => l.id === 'places-buildings-context') as never as {
-    filter?: unknown
-    paint: { 'line-color': unknown }
-  }
-  expect(layer.paint['line-color']).toBe('#2a303b')
-  expect(JSON.stringify(layer.filter)).toContain('building')
-})
-
-it('separates categorised buildings from category-less context features', () => {
-  const filterOf = (id: string) =>
-    (placesLayers().find((l) => l.id === id) as never as {
-      filter?: Parameters<typeof featureFilter>[0]
-    }).filter
-  const categoryFilter = featureFilter(filterOf('places-buildings'))
-  const contextFilter = featureFilter(filterOf('places-buildings-context'))
+it('excludes category-less features from every layer', () => {
   const globals = { zoom: 15 }
-  const building = (category: string | null) => ({
+  const feature = {
     type: 'Feature' as const,
     geometry: { type: 'Point' as const, coordinates: [0, 0] },
-    properties: { geometryType: 'building', category },
-  }) as never
+    properties: {
+      id: 'way/1',
+      geometryType: 'building',
+      category: null,
+      name: 'Context',
+      genericLabel: 'Context',
+    },
+  } as never
 
-  expect(categoryFilter.filter(globals, building('shop'))).toBe(true)
-  expect(categoryFilter.filter(globals, building(null))).toBe(false)
-  expect(contextFilter.filter(globals, building(null))).toBe(true)
-  expect(contextFilter.filter(globals, building('shop'))).toBe(false)
+  for (const [id, filter] of Object.entries(layerFilters([], 'way/1'))) {
+    expect(featureFilter(filter).filter(globals, feature), id).toBe(false)
+  }
+})
+
+it('keeps category-less buildings out of the revealed building layer', () => {
+  const filter = featureFilter(layerFilters([], 'way/1')['places-buildings'])
+  const globals = { zoom: 15 }
+  const building = (category: string | null) =>
+    ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [0, 0] },
+      properties: { id: 'way/1', geometryType: 'building', category },
+    }) as never
+
+  expect(filter.filter(globals, building('shop'))).toBe(true)
+  expect(filter.filter(globals, building(null))).toBe(false)
+})
+
+it('hides a category from points and labels when toggled off', () => {
+  const filters = layerFilters(['shop'], null)
+  const pointFilter = featureFilter(filters['places-points'])
+  const labelFilter = featureFilter(filters['places-labels'])
+  const globals = { zoom: 15 }
+  const feature = (category: string) =>
+    ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [0, 0] },
+      properties: { geometryType: 'point', category, name: 'X' },
+    }) as never
+
+  expect(pointFilter.filter(globals, feature('shop'))).toBe(false)
+  expect(pointFilter.filter(globals, feature('food'))).toBe(true)
+  expect(labelFilter.filter(globals, feature('shop'))).toBe(false)
+  expect(labelFilter.filter(globals, feature('food'))).toBe(true)
+})
+
+it('hides a category from hover highlights when toggled off', () => {
+  const filters = layerFilters(['shop'], null)
+  const globals = { zoom: 15 }
+  const feature = (category: string) =>
+    ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [0, 0] },
+      properties: { geometryType: 'point', category },
+    }) as never
+
+  for (const id of ['places-hover-fill', 'places-hover-line', 'places-hover-point']) {
+    const filter = featureFilter(filters[id])
+    expect(filter.filter(globals, feature('shop')), id).toBe(false)
+    expect(filter.filter(globals, feature('food')), id).toBe(true)
+  }
+})
+
+it('reveals only the selected footprint in polygon layers', () => {
+  const filters = layerFilters([], 'way/1')
+  const buildingFilter = featureFilter(filters['places-buildings'])
+  const areaFilter = featureFilter(filters['places-areas-outline'])
+  const globals = { zoom: 15 }
+  const feature = (id: string, geometryType: string, category = 'education') =>
+    ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [0, 0] },
+      properties: { id, geometryType, category },
+    }) as never
+
+  expect(buildingFilter.filter(globals, feature('way/1', 'building'))).toBe(true)
+  expect(buildingFilter.filter(globals, feature('way/2', 'building'))).toBe(false)
+  expect(areaFilter.filter(globals, feature('way/1', 'area'))).toBe(true)
+  expect(areaFilter.filter(globals, feature('way/2', 'area'))).toBe(false)
+  expect(
+    featureFilter(layerFilters([], null)['places-buildings']).filter(
+      globals,
+      feature('way/1', 'building'),
+    ),
+  ).toBe(false)
+})
+
+it('pushes the derived filters to every map layer', () => {
+  const setFilter = vi.fn()
+  applyLayerFilters({ setFilter } as never, ['shop'], 'way/1')
+  const filters = layerFilters(['shop'], 'way/1')
+
+  expect(setFilter).toHaveBeenCalledTimes(LAYER_IDS.length)
+  for (const id of LAYER_IDS) expect(setFilter).toHaveBeenCalledWith(id, filters[id])
 })
 
 it('does not label named context buildings', () => {
@@ -88,7 +165,10 @@ it('does not label named context buildings', () => {
     ),
   ).toBe(true)
   expect(
-    labelFilter.filter(globals, feature({ geometryType: 'area', genericLabel: 'Park' })),
+    labelFilter.filter(
+      globals,
+      feature({ geometryType: 'area', category: 'park', genericLabel: 'Park' }),
+    ),
   ).toBe(true)
 })
 
@@ -144,8 +224,6 @@ it('highlights hovered points with a circle layer', () => {
   expect(JSON.stringify((layer as { filter?: unknown }).filter)).toContain('point')
 })
 
-it('never treats neutral context buildings as interactive', () => {
-  expect(INTERACTIVE_LAYER_IDS).toContain('places-buildings')
-  expect(INTERACTIVE_LAYER_IDS).not.toContain('places-buildings-context')
-  expect(INTERACTIVE_LAYER_IDS).not.toContain('places-hover-fill')
+it('only lets dots answer hover and click', () => {
+  expect(INTERACTIVE_LAYER_IDS).toEqual(['places-points'])
 })

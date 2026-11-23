@@ -1,14 +1,14 @@
-import type { ExpressionSpecification, FilterSpecification, LayerSpecification } from 'maplibre-gl'
+import type {
+  ExpressionSpecification,
+  FilterSpecification,
+  LayerSpecification,
+  Map,
+} from 'maplibre-gl'
 import { CATEGORIES, type CategoryId } from '../categories'
 
 export const PLACES_SOURCE_ID = 'places'
 export const HOVER_SOURCE_ID = 'places-hover'
-export const INTERACTIVE_LAYER_IDS = [
-  'places-buildings',
-  'places-areas-fill',
-  'places-areas-outline-tint',
-  'places-points',
-]
+export const INTERACTIVE_LAYER_IDS = ['places-points']
 
 // OpenFreeMap's glyph server only hosts the fonts its own styles use.
 // Omitting text-font makes MapLibre ask for "Open Sans Regular", which 404s.
@@ -25,25 +25,89 @@ function geometryIs(type: 'building' | 'area' | 'point'): ExpressionSpecificatio
   return ['==', ['get', 'geometryType'], type] as ExpressionSpecification
 }
 
+type FilterPart = FilterSpecification | ExpressionSpecification
+
+function placeFilter(
+  hiddenCategories: CategoryId[],
+  ...extra: FilterPart[]
+): FilterSpecification {
+  return [
+    'all',
+    ['!=', ['get', 'category'], null],
+    ['!', ['in', ['get', 'category'], ['literal', hiddenCategories]]],
+    ...extra,
+  ] as FilterSpecification
+}
+
 export function categoryColorExpression(): ExpressionSpecification {
   const matchCases: (string | ExpressionSpecification)[] = ['match', ['get', 'category']]
   for (const cat of CATEGORIES) {
     matchCases.push(cat.id, cat.color)
   }
-  // Neutral slate for context buildings with a null category.
+  // Fallback only; uncategorised features are filtered out of every layer.
   matchCases.push('#2a303b')
   return matchCases as unknown as ExpressionSpecification
 }
 
+export function layerFilters(
+  hiddenCategories: CategoryId[],
+  selectedFootprintId: string | null,
+): Record<string, FilterSpecification> {
+  const selectedId = selectedFootprintId ?? '__none__'
+  const selected = ['==', ['get', 'id'], selectedId] as FilterSpecification
+
+  return {
+    'places-buildings': placeFilter(hiddenCategories, geometryIs('building'), selected),
+    'places-areas-fill': placeFilter(
+      hiddenCategories,
+      geometryIs('area'),
+      categoryIn(FILL_IDS),
+      selected,
+    ),
+    'places-areas-outline-tint': placeFilter(
+      hiddenCategories,
+      geometryIs('area'),
+      categoryIn(OUTLINE_IDS),
+      selected,
+    ),
+    'places-areas-outline': placeFilter(
+      hiddenCategories,
+      geometryIs('area'),
+      categoryIn(OUTLINE_IDS),
+      selected,
+    ),
+    'places-points': placeFilter(hiddenCategories, geometryIs('point')),
+    'places-hover-fill': placeFilter(hiddenCategories),
+    'places-hover-line': placeFilter(hiddenCategories),
+    'places-hover-point': placeFilter(hiddenCategories, geometryIs('point')),
+    'places-labels': placeFilter(
+      hiddenCategories,
+      ['any', ['has', 'name'], ['has', 'genericLabel']] as FilterSpecification,
+    ),
+  }
+}
+
+export function applyLayerFilters(
+  map: Pick<Map, 'setFilter'>,
+  hiddenCategories: CategoryId[],
+  selectedFootprintId: string | null,
+): void {
+  const filters = layerFilters(hiddenCategories, selectedFootprintId)
+  for (const [id, filter] of Object.entries(filters)) {
+    map.setFilter(id, filter)
+  }
+}
+
 export function placesLayers(): LayerSpecification[] {
   const colorExpr = categoryColorExpression()
+  const filters = layerFilters([], null)
 
   return [
     {
       id: 'places-buildings',
       type: 'line',
       source: PLACES_SOURCE_ID,
-      filter: ['all', geometryIs('building'), ['!=', ['get', 'category'], null]] as FilterSpecification,
+      filter: filters['places-buildings'],
       paint: {
         'line-color': colorExpr,
         'line-width': 3,
@@ -51,21 +115,10 @@ export function placesLayers(): LayerSpecification[] {
       },
     },
     {
-      id: 'places-buildings-context',
-      type: 'line',
-      source: PLACES_SOURCE_ID,
-      filter: ['all', geometryIs('building'), ['==', ['get', 'category'], null]] as FilterSpecification,
-      paint: {
-        'line-color': '#2a303b',
-        'line-width': 2,
-        'line-opacity': 0.6,
-      },
-    },
-    {
       id: 'places-areas-fill',
       type: 'fill',
       source: PLACES_SOURCE_ID,
-      filter: ['all', geometryIs('area'), categoryIn(FILL_IDS)] as FilterSpecification,
+      filter: filters['places-areas-fill'],
       paint: {
         'fill-color': colorExpr,
         'fill-opacity': 0.3,
@@ -75,7 +128,7 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-areas-outline-tint',
       type: 'fill',
       source: PLACES_SOURCE_ID,
-      filter: ['all', geometryIs('area'), categoryIn(OUTLINE_IDS)] as FilterSpecification,
+      filter: filters['places-areas-outline-tint'],
       paint: {
         'fill-color': colorExpr,
         'fill-opacity': 0.12,
@@ -85,7 +138,7 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-areas-outline',
       type: 'line',
       source: PLACES_SOURCE_ID,
-      filter: ['all', geometryIs('area'), categoryIn(OUTLINE_IDS)] as FilterSpecification,
+      filter: filters['places-areas-outline'],
       paint: {
         'line-color': colorExpr,
         'line-width': 2.5,
@@ -96,7 +149,7 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-points',
       type: 'circle',
       source: PLACES_SOURCE_ID,
-      filter: geometryIs('point') as FilterSpecification,
+      filter: filters['places-points'],
       paint: {
         'circle-color': colorExpr,
         'circle-pitch-alignment': 'viewport',
@@ -109,6 +162,7 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-hover-fill',
       type: 'fill',
       source: HOVER_SOURCE_ID,
+      filter: filters['places-hover-fill'],
       paint: {
         'fill-color': colorExpr,
         'fill-opacity': 0.35,
@@ -118,6 +172,7 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-hover-line',
       type: 'line',
       source: HOVER_SOURCE_ID,
+      filter: filters['places-hover-line'],
       paint: {
         'line-color': colorExpr,
         'line-width': 1.5,
@@ -128,7 +183,7 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-hover-point',
       type: 'circle',
       source: HOVER_SOURCE_ID,
-      filter: geometryIs('point') as FilterSpecification,
+      filter: filters['places-hover-point'],
       paint: {
         'circle-color': colorExpr,
         'circle-opacity': 0.35,
@@ -142,11 +197,7 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-labels',
       type: 'symbol',
       source: PLACES_SOURCE_ID,
-      filter: [
-        'all',
-        ['any', ['has', 'name'], ['has', 'genericLabel']],
-        ['!', ['all', geometryIs('building'), ['==', ['get', 'category'], null]]],
-      ] as FilterSpecification,
+      filter: filters['places-labels'],
       layout: {
         'text-field': ['coalesce', ['get', 'name'], ['get', 'genericLabel']],
         'text-font': BASEMAP_FONT,

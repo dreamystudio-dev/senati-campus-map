@@ -4,7 +4,13 @@ import type { FeatureCollection } from 'geojson'
 import { sanitizeStyle } from './style'
 import { isFatalMapError } from './errors'
 import { syncHoverSource } from './hover'
-import { PLACES_SOURCE_ID, HOVER_SOURCE_ID, INTERACTIVE_LAYER_IDS, placesLayers } from './layers'
+import {
+  applyLayerFilters,
+  PLACES_SOURCE_ID,
+  HOVER_SOURCE_ID,
+  INTERACTIVE_LAYER_IDS,
+  placesLayers,
+} from './layers'
 import placesData from '../data/places.geojson'
 import { useAppStore } from '../store'
 import { installInvertedRotation } from '../camera/invertRotation'
@@ -111,6 +117,20 @@ export async function createMap(container: HTMLElement): Promise<Map> {
       }
     }
 
+    // Layer filters follow the store; skip unchanged states so hover updates
+    // and other unrelated store writes do not reapply every filter.
+    let lastFilterKey = ''
+    const syncFilters = () => {
+      const { hiddenCategories, selectedFootprintId } = useAppStore.getState()
+      const key = `${hiddenCategories.join(',')}|${selectedFootprintId ?? ''}`
+      if (key === lastFilterKey) return
+      lastFilterKey = key
+      applyLayerFilters(map, hiddenCategories, selectedFootprintId)
+    }
+    syncFilters()
+    const unsubscribeFilters = useAppStore.subscribe(syncFilters)
+    map.once('remove', unsubscribeFilters)
+
     // Hover interactions
     map.on('mousemove', (e: MapMouseEvent) => {
       const state = useAppStore.getState()
@@ -148,7 +168,11 @@ export async function createMap(container: HTMLElement): Promise<Map> {
       const features = map.queryRenderedFeatures(bbox, { layers: INTERACTIVE_LAYER_IDS })
 
       if (features.length > 0 && features[0].properties?.id) {
-        state.select(features[0].properties.id)
+        const footprintId =
+          typeof features[0].properties.footprintId === 'string'
+            ? features[0].properties.footprintId
+            : null
+        state.select(features[0].properties.id, footprintId)
         return
       }
 
