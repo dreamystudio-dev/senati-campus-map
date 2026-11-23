@@ -13,3 +13,12 @@ it('does not render the SENATI corner title', () => {
   render(<App />)
   expect(screen.queryByText('SENATI · Sede Principal')).not.toBeInTheDocument()
 })
+
+it('renders one info panel and one legend panel, and no old overlays', () => {
+  render(<App />)
+  expect(screen.getByTestId('place-panel')).toBeInTheDocument()
+  expect(screen.getByTestId('legend-panel')).toBeInTheDocument()
+  expect(screen.queryByTestId('info-card')).not.toBeInTheDocument()
+  expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument()
+  expect(screen.queryByTestId('title-block')).not.toBeInTheDocument()
+})
