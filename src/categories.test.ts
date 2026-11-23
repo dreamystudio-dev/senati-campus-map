@@ -1,4 +1,5 @@
 // src/categories.test.ts
+import { readFileSync } from 'node:fs'
 import { CATEGORIES, CATEGORY_BY_ID, resolveCategory } from './categories'
 
 it('has the twelve spec categories', () => {
@@ -25,8 +26,24 @@ it('drops filler landuse and unknown tags', () => {
   expect(resolveCategory({})).toBeNull()
 })
 
-it('gives areas a generic label and buildings none', () => {
-  expect(CATEGORY_BY_ID.park.genericLabel).toBe('Parque')
-  expect(CATEGORY_BY_ID.parking.genericLabel).toBe('Estacionamiento')
+it('gives areas English generic labels and buildings none', () => {
+  expect(CATEGORY_BY_ID.park.genericLabel).toBe('Park')
+  expect(CATEGORY_BY_ID.sport.genericLabel).toBe('Pitch')
+  expect(CATEGORY_BY_ID.parking.genericLabel).toBe('Parking')
+  expect(CATEGORY_BY_ID.construction.genericLabel).toBe('Construction')
   expect(CATEGORY_BY_ID.shop.genericLabel).toBeUndefined()
+})
+
+it('keeps only English generic labels in the committed places data', () => {
+  const places = JSON.parse(readFileSync('src/data/places.geojson', 'utf8')) as {
+    features: Array<{ properties: { genericLabel?: string } }>
+  }
+
+  const labels = places.features
+    .map((feature) => feature.properties.genericLabel)
+    .filter((label): label is string => Boolean(label))
+  const allowed = new Set(['Park', 'Pitch', 'Parking', 'Construction'])
+
+  expect(labels.length).toBeGreaterThan(0)
+  for (const label of labels) expect(allowed.has(label)).toBe(true)
 })

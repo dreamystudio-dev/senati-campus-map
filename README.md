@@ -6,7 +6,7 @@ A single-screen 3D landing page for the **SENATI Sede Principal** campus in San 
 - **Plus Code:** `2W2Q+89 San Martín de Porres, Peru`
 - **Coordinates:** `[-77.0604, -11.999]` (centre of `src/data/campus.json`)
 
-The map fills the viewport with zero page scrolling. Places are loaded from committed OpenStreetMap GeoJSON data and styled with category-specific palette colours and 3D extrusions. Visitors explore a single always-on 3D campus overview: drag to pan, scroll to zoom, and right-drag (or Ctrl-drag) to rotate and tilt.
+The map fills the viewport with zero page scrolling. Places are loaded from committed OpenStreetMap GeoJSON data and drawn as flat, category-coloured footprint borders; hovering a markerable place fills it with its own colour at partial opacity. Visitors explore a single always-on 3D campus overview: drag to pan, scroll to zoom, and right-drag (or Ctrl-drag) to rotate and tilt at half the usual sensitivity. There is no controls card.
 
 ---
 
@@ -72,7 +72,7 @@ out geom;
 At build/fetch time, `scripts/fetch-places.ts`:
 1. Resolves OSM tags against the closed category table. Unknown non-building features are dropped.
 2. Derives building heights (`levels * 3.2m`, clamped between 4m and 60m).
-3. Assigns fallback Spanish labels to unnamed areas (e.g. *Parque*, *Cancha*, *Estacionamiento*).
+3. Assigns English fallback labels to unnamed areas (*Park*, *Pitch*, *Parking*, *Construction*).
 4. Commits clean GeoJSON in `src/data/places.geojson`.
 
 ---
@@ -85,8 +85,8 @@ Each category defines:
 - `id`: unique `CategoryId` identifier
 - `label`: English display name for tooltips and info cards
 - `color`: hex color code from the fixed design palette
-- `style`: `'fill'` for solid polygons/extrusions, or `'outline'` for outlines and tinted areas
-- `genericLabel` (optional): Spanish fallback label for unnamed features (e.g. `Parque`)
+- `style`: `'fill'` for solid area fills, or `'outline'` for outline/tinted areas
+- `genericLabel` (optional): English fallback label for unnamed areas (e.g. `Park`)
 - `matches`: tag-matching predicate `(tags: Record<string, string>) => boolean`
 
 ### Palette Tokens
@@ -99,7 +99,7 @@ Each category defines:
 - **Pink (`#e56b9f`):** Worship
 - **Bone (`#e8e2d6`):** Finance & Art
 - **Orange (`#f08a3c`):** Fuel
-- **Slate (`#6b7a8f`):** Parking & Construction / Uncategorised buildings (`#2a303b`)
+- **Slate (`#6b7a8f`):** Parking & Construction; uncategorised context buildings use dark slate (`#2a303b`)
 
 ---
 
@@ -109,16 +109,18 @@ Before deploying or after visual changes, verify the following in a desktop brow
 
 - [ ] **Campus framing:** The overview fits the campus box cleanly on load at 1280×800, 1440×900, and 1920×1080 viewports without page scrollbars.
 - [ ] **Camera controls:**
-  - Right-drag and Ctrl-drag rotate the map in the inverted direction; an opposite drag restores the original frame.
+  - No controls card is present.
+  - Right-drag and Ctrl-drag rotate the map in the inverted direction at roughly 0.4°/px; an opposite drag restores the original frame.
   - Vertical drag tilts with the native sign and stops hard at 60°; it cannot go below 0°.
   - Left-drag pans freely in any direction, with no bounds clamp or snap-back.
   - Scrolling out stops at zoom 12; further scrolling does not change the view.
 - [ ] **Resize:** Resizing the window re-fits the single overview, with no page scrollbars at 1280×800, 1440×900 and 1920×1080.
 - [ ] **Feature hover & inspection:**
-  - Hovering a place shows cursor pointer, white highlight fill/outline, and floating tooltip.
+  - Categorised buildings render as flat coloured borders with no fill at rest; uncategorised buildings render as dark neutral borders.
+  - Hovering a markerable place shows a pointer cursor, fills it with its own border colour at ~35% opacity, and shows a floating tooltip.
+  - Hovering an uncategorised context building shows no pointer cursor, tooltip or info card.
   - Clicking a place opens `InfoCard` dialog with category chip, title, metadata, and close button.
-  - Unnamed parks show the generic label ("Parque"), not blank.
-  - Unnamed buildings display cleanly with neutral colour.
+  - Unnamed areas show English generic labels ("Park", "Pitch", "Parking", "Construction"), not blank.
   - Every category colour is distinguishable on the dark basemap.
   - Pressing `Esc` closes `InfoCard` and restores focus to the map canvas.
 - [ ] **Accessibility:**

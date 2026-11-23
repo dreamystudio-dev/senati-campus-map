@@ -1,4 +1,5 @@
 // src/map/layers.test.ts
+import { featureFilter } from '@maplibre/maplibre-gl-style-spec'
 import { CATEGORIES } from '../categories'
 import { BASEMAP_FONT, categoryColorExpression, INTERACTIVE_LAYER_IDS, placesLayers } from './layers'
 
@@ -39,6 +40,26 @@ it('draws context buildings in neutral slate', () => {
   }
   expect(layer.paint['line-color']).toBe('#2a303b')
   expect(JSON.stringify(layer.filter)).toContain('building')
+})
+
+it('separates categorised buildings from category-less context features', () => {
+  const filterOf = (id: string) =>
+    (placesLayers().find((l) => l.id === id) as never as {
+      filter?: Parameters<typeof featureFilter>[0]
+    }).filter
+  const categoryFilter = featureFilter(filterOf('places-buildings'))
+  const contextFilter = featureFilter(filterOf('places-buildings-context'))
+  const globals = { zoom: 15 }
+  const building = (category: string | null) => ({
+    type: 'Feature' as const,
+    geometry: { type: 'Point' as const, coordinates: [0, 0] },
+    properties: { geometryType: 'building', category },
+  }) as never
+
+  expect(categoryFilter.filter(globals, building('shop'))).toBe(true)
+  expect(categoryFilter.filter(globals, building(null))).toBe(false)
+  expect(contextFilter.filter(globals, building(null))).toBe(true)
+  expect(contextFilter.filter(globals, building('shop'))).toBe(false)
 })
 
 it('splits fills from outlines using the category style', () => {

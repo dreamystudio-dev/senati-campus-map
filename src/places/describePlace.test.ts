@@ -8,7 +8,7 @@ it('uses the name when present', () => {
 })
 
 it('falls back to the generic label for unnamed areas', () => {
-  expect(describePlace({ ...base }).title).toBe('Parque')
+  expect(describePlace({ ...base }).title).toBe('Park')
 })
 
 it('never returns a blank title for an unnamed building', () => {

@@ -6,13 +6,14 @@ Project guidance for AI agents and new contributors. Read this before touching c
 
 A single-screen 3D landing page for the **SENATI Sede Principal** campus in San Martín de
 Porres, Lima (plus code `2W2Q+89`). The map fills the viewport: no page scroll, one always-on 3D
-campus overview, and places coloured by category from OpenStreetMap data.
+campus overview, and places drawn as flat category-coloured borders from OpenStreetMap data.
 
-**Current state:** all blocks implemented, single-mode redesign applied.
+**Current state:** all blocks implemented, single-mode flat overview applied.
 
 ## Read first
 
-- `docs/superpowers/specs/2026-11-22-top-view-only-redesign-design.md` — the design source of truth for the single-mode overview.
+- `docs/superpowers/specs/2026-11-22-flat-outlines-and-english-design.md` — the design source of truth for the flat English overview.
+- `docs/superpowers/specs/2026-11-22-top-view-only-redesign-design.md` — historical design; its camera/mode sections are still authoritative for the single overview.
 - `docs/superpowers/specs/2026-11-21-campus-map-design.md` — historical design; its camera/mode sections are superseded.
 - `PLAN.md` — historical implementation plan; its camera/mode sections are superseded.
 
@@ -48,11 +49,16 @@ campus data or the category table changes, and commit the regenerated GeoJSON.
 - **Static hosting only.** No API keys, no environment variables, no server functions.
 - **No runtime Overpass calls.** `src/data/places.geojson` is committed.
 - **Closed category table.** Unknown OSM tags are dropped at fetch time, never rendered.
-  Uncategorised buildings are the one exception: they are kept with `category: null` and render
-  neutral, so the campus keeps its 3D mass.
+  Uncategorised buildings are the one exception: they are kept with `category: null` as neutral
+  flat outlines for context, with no label, tooltip, info card or pointer cursor.
+- **Flat buildings.** Categorised buildings are 3 px footprint borders in their category colour.
+  There are no fill-extrusion layers. Hovering a markerable place fills it with its border colour
+  at 35% opacity; the resting map has no building fill.
+- **No controls card.** The map is self-explanatory; do not reintroduce the panel or copy module.
 - **One camera: the overview.** No mode switch, no first-person view, no pointer lock.
 - **Camera limits.** Zoom 12–19.5, pitch 0–60°. Pan is unrestricted; `maxBounds` is not set.
-- **Inverted rotation.** Right-drag or Ctrl-drag turns the map opposite to MapLibre's default; vertical drag keeps native tilt.
+- **Inverted rotation.** Right-drag or Ctrl-drag turns the map opposite to MapLibre's default at
+  half sensitivity (0.4°/px); vertical drag keeps native tilt.
 - **Fixed palette.** sky `#5aa9e6`, coral `#ef6f6c`, amber `#f2b134`, violet `#9b7ede`,
   lime `#8bc34a`, teal `#2ec4b6`, pink `#e56b9f`, bone `#e8e2d6`, orange `#f08a3c`,
   slate `#6b7a8f`.
@@ -80,12 +86,13 @@ Pure logic lives apart from MapLibre calls so it can be unit tested in jsdom.
 - **Strip the basemap's own buildings and POIs.** OpenFreeMap Liberty ships `building*` and
   `poi*` layers that would double up with ours.
 - **Rotation is a custom handler.** `dragRotate.disable()` is called and a canvas handler mirrors
-  MapLibre's centre-dependent bearing math, then negates only the bearing. Tilt keeps its native
-  sign and clamps to `map.getMaxPitch()`.
-- **Heights are derived, not surveyed.** `building:levels × 3.2`, clamped 4–60 m. Do not claim
-  precision.
-- **Unnamed areas need a label.** Parks, pitches, parking and construction fall back to a
-  generic Spanish label; unnamed buildings and points get colour but no label.
+  MapLibre's centre-dependent bearing math, negates the bearing and scales it by 0.5. Tilt keeps
+  its native sign and clamps to `map.getMaxPitch()`.
+- **Heights are derived, not surveyed.** `building:levels × 3.2`, clamped 4–60 m. They are
+  informational only: buildings render as flat footprints. Do not claim precision.
+- **Unnamed areas need a label.** Parks, pitches, parking and construction fall back to the
+  English labels `Park`, `Pitch`, `Parking` and `Construction`. Uncategorised context buildings
+  and points get no label.
 
 ## Conventions
 

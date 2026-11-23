@@ -60,7 +60,7 @@ export const CATEGORIES: Category[] = [
     label: 'Park & Garden',
     color: '#8bc34a', // lime
     style: 'outline',
-    genericLabel: 'Parque',
+    genericLabel: 'Park',
     matches: (tags) => ['park', 'garden'].includes(tags.leisure),
   },
   {
@@ -68,7 +68,7 @@ export const CATEGORIES: Category[] = [
     label: 'Sport',
     color: '#2ec4b6', // teal
     style: 'outline',
-    genericLabel: 'Cancha',
+    genericLabel: 'Pitch',
     matches: (tags) => ['pitch', 'sports_centre', 'stadium'].includes(tags.leisure),
   },
   {
@@ -104,7 +104,7 @@ export const CATEGORIES: Category[] = [
     label: 'Parking',
     color: '#6b7a8f', // slate
     style: 'outline',
-    genericLabel: 'Estacionamiento',
+    genericLabel: 'Parking',
     matches: (tags) => tags.amenity === 'parking',
   },
   {
@@ -112,7 +112,7 @@ export const CATEGORIES: Category[] = [
     label: 'Construction',
     color: '#6b7a8f', // slate
     style: 'outline',
-    genericLabel: 'Construcción',
+    genericLabel: 'Construction',
     matches: (tags) => ['construction', 'brownfield'].includes(tags.landuse),
   },
 ]

@@ -55,7 +55,7 @@ it('gives unnamed areas a generic label but not buildings', () => {
   const fc = transformOverpass(sample as never)
   const park = fc.features.find((f: Feature<Geometry, PlaceProps>) => f.properties.id === 'way/200')
   const building = fc.features.find((f: Feature<Geometry, PlaceProps>) => f.properties.id === 'way/100')
-  expect(park?.properties.genericLabel).toBe('Parque')
+  expect(park?.properties.genericLabel).toBe('Park')
   expect(building?.properties.genericLabel).toBeUndefined()
 })
 

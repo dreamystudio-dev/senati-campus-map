@@ -43,7 +43,7 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-buildings',
       type: 'line',
       source: PLACES_SOURCE_ID,
-      filter: ['all', geometryIs('building'), ['has', 'category']] as FilterSpecification,
+      filter: ['all', geometryIs('building'), ['!=', ['get', 'category'], null]] as FilterSpecification,
       paint: {
         'line-color': colorExpr,
         'line-width': 3,
@@ -54,7 +54,7 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-buildings-context',
       type: 'line',
       source: PLACES_SOURCE_ID,
-      filter: ['all', geometryIs('building'), ['!', ['has', 'category']]] as FilterSpecification,
+      filter: ['all', geometryIs('building'), ['==', ['get', 'category'], null]] as FilterSpecification,
       paint: {
         'line-color': '#2a303b',
         'line-width': 2,
