@@ -1,35 +1,41 @@
 // scripts/fetch-places.test.ts
 import { readFileSync } from 'node:fs'
 import type { Feature, Geometry } from 'geojson'
-import { deriveHeightM, PLACES_BBOX, transformOverpass, type PlaceProps } from './fetch-places'
+import {
+  deriveHeightM,
+  PLACES_BBOX,
+  strictlyInsidePolygon,
+  transformOverpass,
+  type PlaceProps,
+} from './fetch-places'
 import sample from './fixtures/overpass-sample.json'
 
-function insideRing(point: [number, number], ring: number[][]): boolean {
-  const [x, y] = point
-  let inside = false
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const xi = ring[i][0]
-    const yi = ring[i][1]
-    const xj = ring[j][0]
-    const yj = ring[j][1]
-
-    const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi
-    if (intersect) inside = !inside
-  }
-  return inside
+function polygonsOf(geometry: any): number[][][][] {
+  return geometry.type === 'Polygon'
+    ? [geometry.coordinates]
+    : geometry.type === 'MultiPolygon'
+      ? geometry.coordinates
+      : []
 }
 
-function insidePolygon(point: [number, number], geometry: any): boolean {
-  const polygons: number[][][][] =
-    geometry.type === 'Polygon'
-      ? [geometry.coordinates]
-      : geometry.type === 'MultiPolygon'
-        ? geometry.coordinates
-        : []
-  return polygons.some(
-    (rings) => insideRing(point, rings[0]) && !rings.slice(1).some((hole) => insideRing(point, hole)),
-  )
+function labelInside(point: [number, number], geometry: any): boolean {
+  return polygonsOf(geometry).some((polygon) => strictlyInsidePolygon(point, polygon))
 }
+
+it('rejects boundary points as label anchors', () => {
+  const square = [
+    [
+      [-77.06, -12.0],
+      [-77.059, -12.0],
+      [-77.059, -11.999],
+      [-77.06, -11.999],
+      [-77.06, -12.0],
+    ],
+  ]
+  expect(strictlyInsidePolygon([-77.0595, -11.9995], square)).toBe(true)
+  expect(strictlyInsidePolygon([-77.059, -11.9995], square)).toBe(false)
+  expect(strictlyInsidePolygon([-77.0595, -11.999], square)).toBe(false)
+})
 
 it('derives height from levels, then height, then default', () => {
   expect(deriveHeightM({ 'building:levels': '2' })).toBe(6.4)
@@ -85,7 +91,7 @@ it('formats ids as osm type and id, and types each geometry class', () => {
 it('puts label points inside their polygons in fixtures and committed data', () => {
   const fc = transformOverpass(sample as never)
   for (const f of fc.features.filter((f: Feature<Geometry, PlaceProps>) => f.properties.geometryType !== 'point')) {
-    expect(insidePolygon([f.properties.labelLng, f.properties.labelLat], f.geometry), f.properties.id).toBe(true)
+    expect(labelInside([f.properties.labelLng, f.properties.labelLat], f.geometry), f.properties.id).toBe(true)
   }
 
   const committed = JSON.parse(readFileSync('src/data/places.geojson', 'utf8')) as {
@@ -94,7 +100,7 @@ it('puts label points inside their polygons in fixtures and committed data', () 
   for (const f of committed.features.filter(
     (f) => f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon',
   )) {
-    expect(insidePolygon([f.properties.labelLng, f.properties.labelLat], f.geometry), f.properties.id).toBe(true)
+    expect(labelInside([f.properties.labelLng, f.properties.labelLat], f.geometry), f.properties.id).toBe(true)
   }
 })
 
@@ -122,7 +128,7 @@ it('keeps the original sixteen POI dots in the committed data', () => {
     .filter((f) => f.properties.geometryType === 'point')
     .map((f) => f.properties.id)
 
-  expect(ids).toEqual([
+  expect([...ids].sort()).toEqual([
     'node/1863374473',
     'node/4379685965',
     'node/4379685966',
@@ -139,5 +145,5 @@ it('keeps the original sixteen POI dots in the committed data', () => {
     'node/14361385759',
     'node/14361385760',
     'node/14383648668',
-  ])
+  ].sort())
 })

@@ -95,36 +95,55 @@ function ringContains(point: Position, ring: Position[]): boolean {
   return inside
 }
 
+function pointOnSegment(point: Position, start: Position, end: Position): boolean {
+  const cross = (point[0] - start[0]) * (end[1] - start[1]) - (point[1] - start[1]) * (end[0] - start[0])
+  const epsilon = 1e-12
+  return (
+    Math.abs(cross) < epsilon &&
+    point[0] >= Math.min(start[0], end[0]) - epsilon &&
+    point[0] <= Math.max(start[0], end[0]) + epsilon &&
+    point[1] >= Math.min(start[1], end[1]) - epsilon &&
+    point[1] <= Math.max(start[1], end[1]) + epsilon
+  )
+}
+
 function polygonContains(point: Position, polygon: Position[][]): boolean {
   return ringContains(point, polygon[0]) && !polygon.slice(1).some((hole) => ringContains(point, hole))
 }
 
-function interiorLabelPoint(polygon: Position[][]): Position {
-  for (const precision of [1.0, 0.1, 0.01]) {
-    const candidate = polylabel(polygon, precision)
-    if (polygonContains(candidate, polygon)) return candidate
+export function strictlyInsidePolygon(point: Position, polygon: Position[][]): boolean {
+  const onBoundary = polygon.some((ring) =>
+    ring.some((vertex, i) => pointOnSegment(point, vertex, ring[(i + 1) % ring.length])),
+  )
+  return !onBoundary && polygonContains(point, polygon)
+}
+
+function interiorLabelPoint(polygon: Position[][]): Position | null {
+  // The committed geometry is rounded too, so validate against that version:
+  // a candidate clear of the raw ring can land exactly on a rounded vertex.
+  const roundedPolygon = polygon.map((ring) => ring.map((pt) => [round5(pt[0]), round5(pt[1])] as Position))
+
+  for (const precision of [1.0, 0.1, 0.01, 0.001]) {
+    const [lng, lat] = polylabel(polygon, precision)
+    const candidate: Position = [round5(lng), round5(lat)]
+    if (strictlyInsidePolygon(candidate, roundedPolygon)) return candidate
   }
 
-  // Concave rings can make polylabel land on a boundary vertex. Search a grid
-  // inside the outer ring for a point that is also outside every hole.
-  const outer = polygon[0]
-  const lngs = outer.map((p) => p[0])
-  const lats = outer.map((p) => p[1])
-  const minLng = Math.min(...lngs)
-  const maxLng = Math.max(...lngs)
-  const minLat = Math.min(...lats)
-  const maxLat = Math.max(...lats)
-  const steps = 32
-  for (let i = 1; i < steps; i++) {
-    for (let j = 1; j < steps; j++) {
-      const candidate: Position = [
-        minLng + ((maxLng - minLng) * i) / steps,
-        minLat + ((maxLat - minLat) * j) / steps,
-      ]
-      if (polygonContains(candidate, polygon)) return candidate
+  // Fall back to a search on the same 1e-5 grid the committed data uses.
+  const outer = roundedPolygon[0]
+  const minX = Math.ceil(Math.min(...outer.map((p) => p[0])) * 1e5)
+  const maxX = Math.floor(Math.max(...outer.map((p) => p[0])) * 1e5)
+  const minY = Math.ceil(Math.min(...outer.map((p) => p[1])) * 1e5)
+  const maxY = Math.floor(Math.max(...outer.map((p) => p[1])) * 1e5)
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      const candidate: Position = [x / 1e5, y / 1e5]
+      if (strictlyInsidePolygon(candidate, roundedPolygon)) return candidate
     }
   }
-  return outer[0]
+  // Degenerate rings have no interior point; drop the feature rather than
+  // committing an anchor that sits on the boundary or outside the footprint.
+  return null
 }
 
 export function transformOverpass(osm: unknown): FeatureCollection<Geometry, PlaceProps> {
@@ -154,18 +173,12 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
     }
 
     // Determine label coordinate
-    let labelLng: number
-    let labelLat: number
+    let labelPoint: Position | null = null
 
     if (geomType === 'Point') {
-      const pt = (feature.geometry as Point).coordinates
-      labelLng = pt[0]
-      labelLat = pt[1]
+      labelPoint = (feature.geometry as Point).coordinates
     } else if (geomType === 'Polygon') {
-      const poly = feature.geometry as Polygon
-      const [lng, lat] = interiorLabelPoint(poly.coordinates)
-      labelLng = lng
-      labelLat = lat
+      labelPoint = interiorLabelPoint((feature.geometry as Polygon).coordinates)
     } else if (geomType === 'MultiPolygon') {
       const mpoly = feature.geometry as MultiPolygon
       // find largest polygon by ring length or first
@@ -175,12 +188,10 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
           bestPoly = p
         }
       }
-      const [lng, lat] = interiorLabelPoint(bestPoly)
-      labelLng = lng
-      labelLat = lat
-    } else {
-      continue
+      labelPoint = interiorLabelPoint(bestPoly)
     }
+    if (!labelPoint) continue
+    const [labelLng, labelLat] = labelPoint
 
     // ID formatting: osm type and id (feature.id is usually "way/123", "node/123", "relation/123")
     const id = String(feature.id)

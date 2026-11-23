@@ -15985,7 +15985,7 @@
         "kind": "shop=car_repair",
         "geometryType": "building",
         "labelLng": -77.05678,
-        "labelLat": -11.99846,
+        "labelLat": -11.99849,
         "heightM": 4
       }
     },
@@ -22090,7 +22090,7 @@
         "category": null,
         "kind": "building=yes",
         "geometryType": "building",
-        "labelLng": -77.05861,
+        "labelLng": -77.05863,
         "labelLat": -12.00302,
         "heightM": 6
       }
