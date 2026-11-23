@@ -3,6 +3,7 @@ import type { Map } from 'maplibre-gl'
 type Point = { x: number; y: number }
 
 const ROTATION_DEGREES_PER_PIXEL = 0.8
+const ROTATION_SENSITIVITY = 0.5
 // MapLibre uses -0.5 per pixel moved downwards; expressed as gain per pixel dragged up.
 const PITCH_GAIN_PER_PIXEL = 0.5
 const ANGULAR_THRESHOLD_PX = 100
@@ -27,7 +28,7 @@ function nativeBearingDelta(last: Point, current: Point, center: Point): number 
 /** Negates MapLibre's bearing at every drag position; tilt keeps its native sign. */
 export function rotationDelta(last: Point, current: Point, center: Point) {
   return {
-    bearingDelta: -nativeBearingDelta(last, current, center) || 0,
+    bearingDelta: -nativeBearingDelta(last, current, center) * ROTATION_SENSITIVITY || 0,
     pitchDelta: (last.y - current.y) * PITCH_GAIN_PER_PIXEL,
   }
 }

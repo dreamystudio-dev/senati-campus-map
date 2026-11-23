@@ -56,7 +56,7 @@ function setup(maxPitch = 60) {
 
 it('negates native bearing below the centre and keeps the pitch delta', () => {
   expect(rotationDelta({ x: 500, y: 350 }, { x: 550, y: 350 }, CENTER)).toEqual({
-    bearingDelta: -40,
+    bearingDelta: -20,
     pitchDelta: 0,
   })
   expect(rotationDelta({ x: 500, y: 350 }, { x: 500, y: 330 }, CENTER)).toEqual({
@@ -67,14 +67,14 @@ it('negates native bearing below the centre and keeps the pitch delta', () => {
 
 it('also negates the bearing MapLibre flips above the centre', () => {
   expect(rotationDelta({ x: 500, y: 250 }, { x: 550, y: 250 }, CENTER)).toEqual({
-    bearingDelta: 40,
+    bearingDelta: 20,
     pitchDelta: 0,
   })
 })
 
 it('negates MapLibre angular rotation far from the centre', () => {
   const delta = rotationDelta({ x: 500, y: 500 }, { x: 700, y: 500 }, CENTER)
-  expect(delta.bearingDelta).toBeCloseTo(-45, 6)
+  expect(delta.bearingDelta).toBeCloseTo(-22.5, 6)
   expect(delta.pitchDelta).toBe(0)
 })
 
@@ -82,11 +82,11 @@ it('takes over right-drag and ctrl+left-drag with inverted bearing', () => {
   const { map, jumpTo, drag, setBearing } = setup()
   expect(map.dragRotate.disable).toHaveBeenCalledOnce()
   drag({ x: 500, y: 250 }, { x: 550, y: 250 })
-  expect(jumpTo).toHaveBeenLastCalledWith(expect.objectContaining({ bearing: 40, pitch: 0 }))
+  expect(jumpTo).toHaveBeenLastCalledWith(expect.objectContaining({ bearing: 20, pitch: 0 }))
   jumpTo.mockClear()
   setBearing(0)
   drag({ x: 500, y: 350 }, { x: 550, y: 340 }, { button: 0, ctrlKey: true })
-  expect(jumpTo).toHaveBeenLastCalledWith(expect.objectContaining({ bearing: -40, pitch: 5 }))
+  expect(jumpTo).toHaveBeenLastCalledWith(expect.objectContaining({ bearing: -20, pitch: 5 }))
 })
 
 it('clamps tilt to the map maximum', () => {
@@ -108,7 +108,7 @@ it('ignores sub-3px drags and measures the first accepted move from the start', 
   mouse('mousemove', 502, 350, { button: 2, buttons: 2 })
   expect(jumpTo).not.toHaveBeenCalled()
   mouse('mousemove', 520, 350, { button: 2, buttons: 2 })
-  expect(jumpTo).toHaveBeenCalledWith(expect.objectContaining({ bearing: -16 }))
+  expect(jumpTo).toHaveBeenCalledWith(expect.objectContaining({ bearing: -8 }))
 })
 
 it('resets when the button is released outside the window or the window blurs', () => {
