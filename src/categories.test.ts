@@ -63,7 +63,7 @@ it('matches visitable place tags that were previously dropped', () => {
 })
 
 it('still drops street furniture and non-place land use', () => {
-  for (const tags of [
+  const cases: Record<string, string>[] = [
     { amenity: 'waste_basket' },
     { amenity: 'recycling' },
     { amenity: 'parking_entrance' },
@@ -72,7 +72,8 @@ it('still drops street furniture and non-place land use', () => {
     { landuse: 'residential' },
     { landuse: 'garages' },
     { landuse: 'greenfield' },
-  ]) {
+  ]
+  for (const tags of cases) {
     expect(resolveCategory(tags), JSON.stringify(tags)).toBeNull()
   }
 })

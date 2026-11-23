@@ -140,7 +140,7 @@ it('commits no uncategorised features', () => {
 
 it('keeps the original sixteen POI dots among the restored nearby nodes', () => {
   const data = JSON.parse(readFileSync('src/data/places.geojson', 'utf8')) as {
-    features: Array<{ properties: { id: string; geometryType?: string } }>
+    features: Array<{ properties: { id: string; geometryType?: string; footprintId?: string } }>
   }
   const ids = data.features
     .filter((f) => f.properties.geometryType === 'point' && !f.properties.footprintId)
