@@ -7,15 +7,9 @@ export type CategoryId =
   | 'sport'
   | 'worship'
   | 'finance'
-  | 'fuel'
-  | 'art'
-  | 'parking'
-  | 'construction'
   | 'health'
   | 'community'
-  | 'transit'
   | 'entertainment'
-  | 'facilities'
 
 export type MarkStyle = 'fill' | 'outline'
 
@@ -91,36 +85,6 @@ export const CATEGORIES: Category[] = [
     matches: (tags) => ['bank', 'atm'].includes(tags.amenity),
   },
   {
-    id: 'fuel',
-    label: 'Fuel',
-    color: '#f08a3c', // orange
-    style: 'fill',
-    matches: (tags) => tags.amenity === 'fuel',
-  },
-  {
-    id: 'art',
-    label: 'Art',
-    color: '#e8e2d6', // bone
-    style: 'fill',
-    matches: (tags) => tags.tourism === 'artwork',
-  },
-  {
-    id: 'parking',
-    label: 'Parking',
-    color: '#6b7a8f', // slate
-    style: 'outline',
-    genericLabel: 'Parking',
-    matches: (tags) => tags.amenity === 'parking',
-  },
-  {
-    id: 'construction',
-    label: 'Construction',
-    color: '#6b7a8f', // slate
-    style: 'outline',
-    genericLabel: 'Construction',
-    matches: (tags) => ['construction', 'brownfield'].includes(tags.landuse),
-  },
-  {
     id: 'health',
     label: 'Health',
     color: '#2ec4b6', // teal
@@ -138,13 +102,6 @@ export const CATEGORIES: Category[] = [
       tags.tourism === 'information',
   },
   {
-    id: 'transit',
-    label: 'Transit',
-    color: '#6b7a8f', // slate
-    style: 'fill',
-    matches: (tags) => tags.amenity === 'bus_station' || tags.public_transport === 'station',
-  },
-  {
     id: 'entertainment',
     label: 'Entertainment',
     color: '#9b7ede', // violet
@@ -153,13 +110,6 @@ export const CATEGORIES: Category[] = [
       ['cinema', 'theatre', 'nightclub', 'casino'].includes(tags.amenity) ||
       tags.tourism === 'theme_park' ||
       tags.leisure === 'dance',
-  },
-  {
-    id: 'facilities',
-    label: 'Facilities',
-    color: '#f2b134', // amber
-    style: 'outline',
-    matches: (tags) => ['toilets', 'charging_station', 'fountain', 'drinking_water'].includes(tags.amenity),
   },
 ]
 

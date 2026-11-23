@@ -124,7 +124,7 @@ it('commits place dots linked to polygon footprints', () => {
     features: Array<{ geometry: any; properties: PlaceProps }>
   }
   const dots = data.features.filter((f) => f.properties.footprintId !== undefined)
-  expect(dots.length).toBeGreaterThan(100)
+  expect(dots.length).toBeGreaterThan(80)
   for (const dot of dots) {
     expect(dot.geometry.type).toBe('Point')
     expect(dot.properties.id).toBe(`${dot.properties.footprintId}/point`)
@@ -138,7 +138,7 @@ it('commits no uncategorised features', () => {
   expect(data.features.some((f) => f.properties.category === null)).toBe(false)
 })
 
-it('keeps the original sixteen POI dots among the restored nearby nodes', () => {
+it('keeps the named POI dots from the original sixteen', () => {
   const data = JSON.parse(readFileSync('src/data/places.geojson', 'utf8')) as {
     features: Array<{ properties: { id: string; geometryType?: string; footprintId?: string } }>
   }
@@ -147,22 +147,50 @@ it('keeps the original sixteen POI dots among the restored nearby nodes', () => 
     .map((f) => f.properties.id)
 
   expect(ids).toEqual(expect.arrayContaining([
-    'node/1863374473',
-    'node/4379685965',
-    'node/4379685966',
-    'node/4379812240',
-    'node/4379812275',
-    'node/4379812276',
-    'node/5577057586',
-    'node/5577057587',
-    'node/5577057588',
-    'node/5577057589',
-    'node/5577057590',
-    'node/5577057591',
-    'node/9406636346',
-    'node/14361385759',
-    'node/14361385760',
-    'node/14383648668',
+    'node/1863374473', 'node/4379685965', 'node/4379685966', 'node/4379812240',
+    'node/4379812275', 'node/4379812276', 'node/5577057586', 'node/5577057587',
+    'node/5577057588', 'node/5577057589', 'node/5577057590', 'node/5577057591',
   ]))
-  expect(ids.length).toBeGreaterThan(16)
+  expect(ids.length).toBeGreaterThan(12)
+})
+
+it('drops places with neither a name nor a generic label', () => {
+  const response = {
+    version: 0.6,
+    generator: 'Overpass API',
+    elements: [
+      { type: 'node', id: 1, lat: -11.999, lon: -77.06, tags: { shop: 'convenience' } },
+      {
+        type: 'way', id: 2, tags: { building: 'yes', shop: 'clothes' },
+        geometry: [
+          { lat: -11.999, lon: -77.06 }, { lat: -11.999, lon: -77.059 },
+          { lat: -11.998, lon: -77.059 }, { lat: -11.998, lon: -77.06 },
+          { lat: -11.999, lon: -77.06 },
+        ],
+      },
+      {
+        type: 'way', id: 3, tags: { leisure: 'park' },
+        geometry: [
+          { lat: -11.997, lon: -77.062 }, { lat: -11.997, lon: -77.061 },
+          { lat: -11.996, lon: -77.061 }, { lat: -11.996, lon: -77.062 },
+          { lat: -11.997, lon: -77.062 },
+        ],
+      },
+    ],
+  }
+  const fc = transformOverpass(response as never)
+  const ids = fc.features.map((f) => f.properties.id)
+  expect(ids).not.toContain('node/1')
+  expect(ids).not.toContain('way/2')
+  expect(ids).not.toContain('way/2/point')
+  expect(ids).toContain('way/3')
+  expect(ids).toContain('way/3/point')
+  expect(fc.features.find((f) => f.properties.id === 'way/3')?.properties.genericLabel).toBe('Park')
+})
+
+it('commits no place without a name or generic label', () => {
+  const data = JSON.parse(readFileSync('src/data/places.geojson', 'utf8')) as {
+    features: Array<{ properties: { name?: string; genericLabel?: string } }>
+  }
+  expect(data.features.some((f) => !f.properties.name && !f.properties.genericLabel)).toBe(false)
 })

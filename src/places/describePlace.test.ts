@@ -11,9 +11,10 @@ it('falls back to the generic label for unnamed areas', () => {
   expect(describePlace({ ...base }).title).toBe('Park')
 })
 
-it('never returns a blank title for an unnamed building', () => {
+it('never invents an Unnamed title', () => {
   const p = { ...base, category: 'shop', geometryType: 'building' } as const
-  expect(describePlace({ ...p }).title).toBe('Unnamed shop')
+  expect(describePlace({ ...p }).title).toBe('')
+  expect(JSON.stringify(describePlace({ ...p }))).not.toContain('Unnamed')
 })
 
 it('does not invent a type for a category-less feature', () => {

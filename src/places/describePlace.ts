@@ -24,12 +24,8 @@ export function describePlace(p: PlacePropsInput): PlaceSummary {
   const cat = p.category ? CATEGORY_BY_ID[p.category] : null
 
   let title = p.name ?? ''
-  if (!title) {
-    if (cat?.genericLabel) {
-      title = cat.genericLabel
-    } else if (p.category) {
-      title = `Unnamed ${p.category}`
-    }
+  if (!title && cat?.genericLabel) {
+    title = cat.genericLabel
   }
 
   const categoryLabel = cat?.label ?? ''

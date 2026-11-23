@@ -212,11 +212,14 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
     if (tags.name) {
       props.name = tags.name
     }
-    // Unnamed areas need something to render: parks, pitches, parking and
-    // construction sites fall back to their category's generic English label.
+    // Unnamed areas need something to render: parks and pitches fall back to
+    // their category's generic English label.
     if (placeGeometryType === 'area' && category?.genericLabel) {
       props.genericLabel = category.genericLabel
     }
+    // A place with neither a name nor a generic label would only ever show
+    // "Unnamed <category>"; drop it at fetch time so it gets no dot or outline.
+    if (!props.name && !props.genericLabel) continue
     if (levels !== undefined && !isNaN(levels)) {
       props.levels = levels
     }
