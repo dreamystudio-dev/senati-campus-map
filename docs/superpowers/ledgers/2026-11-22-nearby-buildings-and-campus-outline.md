@@ -25,6 +25,10 @@ Plan: `docs/superpowers/plans/2026-11-22-nearby-buildings-and-campus-outline.md`
 
 ## Final whole-branch review
 
-- [ ] Fresh reviewer subagent dispatched with spec + plan + diff
-- [ ] Findings fixed and re-verified
+- [x] Fresh reviewer subagent dispatched with spec + plan + diff
+- [x] Findings fixed in `9af15e4` and re-verified:
+  - POI dots pinned to the original 16 ids; new nearby points dropped while nearby areas/buildings kept (558 features, 481 buildings, 61 areas, 16 points, 529 KB)
+  - `interiorLabelPoint` validates polylabel output and falls back to a grid search; all 542 committed label anchors now inside their polygons
+  - Building-count threshold raised from >120 to >350
+  - Full gate PASS (66 tests); Chrome re-check PASS at all three viewports with no console errors
 - [ ] Completion reported to user
