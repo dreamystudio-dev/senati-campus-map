@@ -1,6 +1,11 @@
 // src/map/bounds.test.ts
 import { CAMPUS, fitZoom } from './bounds'
 
+it('uses the two-times-campus overview bounds', () => {
+  expect(CAMPUS.bounds).toEqual([-77.0664, -12.0043, -77.0544, -11.9937])
+  expect(CAMPUS.center).toEqual([-77.0604, -11.999])
+})
+
 it('fits the campus at a laptop viewport inside the allowed range', () => {
   const zoom = fitZoom(CAMPUS.bounds, { width: 1280, height: 800 }, 48)
   expect(zoom).toBeGreaterThanOrEqual(12)

@@ -8,3 +8,8 @@ it('renders a full-viewport, non-scrolling shell', () => {
   expect(screen.queryByRole('button', { name: /^free$/i })).not.toBeInTheDocument()
   expect(screen.queryByTestId('controls-card')).not.toBeInTheDocument()
 })
+
+it('does not render the SENATI corner title', () => {
+  render(<App />)
+  expect(screen.queryByText('SENATI · Sede Principal')).not.toBeInTheDocument()
+})
