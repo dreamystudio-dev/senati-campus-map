@@ -31,4 +31,9 @@ Plan: `docs/superpowers/plans/2026-11-22-nearby-buildings-and-campus-outline.md`
   - `interiorLabelPoint` validates polylabel output and falls back to a grid search; all 542 committed label anchors now inside their polygons
   - Building-count threshold raised from >120 to >350
   - Full gate PASS (66 tests); Chrome re-check PASS at all three viewports with no console errors
-- [ ] Completion reported to user
+- [x] Second verification round found two residual Minors, fixed in `64dd8a6`:
+  - Label anchors validated against the rounded footprint with an explicit boundary check; `way/1011727829` moved inside; test now rejects boundary points and shares the production validator
+  - POI id assertion sorted so Overpass ordering changes cannot fail CI
+  - Degenerate polygons with no interior point are dropped instead of getting a boundary anchor
+  - Full gate PASS (67 tests); Chrome re-check PASS at all three viewports with no console errors
+- [x] Completion reported to user
