@@ -1,5 +1,7 @@
 # Top-view-only redesign Implementation Plan
 
+> **Completed:** all five tasks were implemented and verified on `main` (commits `f785542..6bc1c36`, plus the rotation review fix). Checkboxes below are the original execution record.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Remove the first-person Free mode entirely and leave one always-on 3D campus overview with inverted rotation, unrestricted panning and a much lower zoom floor.

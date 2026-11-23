@@ -3,7 +3,7 @@ import { CAMPUS, fitZoom } from './bounds'
 
 it('fits the campus at a laptop viewport inside the allowed range', () => {
   const zoom = fitZoom(CAMPUS.bounds, { width: 1280, height: 800 }, 48)
-  expect(zoom).toBeGreaterThanOrEqual(15.5)
+  expect(zoom).toBeGreaterThanOrEqual(12)
   expect(zoom).toBeLessThanOrEqual(19.5)
 })
 

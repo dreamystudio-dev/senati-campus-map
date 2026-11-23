@@ -79,8 +79,9 @@ Pure logic lives apart from MapLibre calls so it can be unit tested in jsdom.
   feel by hand in a browser.
 - **Strip the basemap's own buildings and POIs.** OpenFreeMap Liberty ships `building*` and
   `poi*` layers that would double up with ours.
-- **Rotation is a custom handler.** `dragRotate.disable()` is called and a canvas handler negates
-  the bearing delta; keep its sign and the 60° pitch cap in sync with `rotationDelta`.
+- **Rotation is a custom handler.** `dragRotate.disable()` is called and a canvas handler mirrors
+  MapLibre's centre-dependent bearing math, then negates only the bearing. Tilt keeps its native
+  sign and clamps to `map.getMaxPitch()`.
 - **Heights are derived, not surveyed.** `building:levels × 3.2`, clamped 4–60 m. Do not claim
   precision.
 - **Unnamed areas need a label.** Parks, pitches, parking and construction fall back to a
