@@ -27,8 +27,11 @@ it('shows nothing when no place is hovered', () => {
 it('sizes the tooltip to its content and centres it', () => {
   useAppStore.getState().setHovered('way/440258367', { x: 100, y: 100 })
   render(<PlacePanel />)
-  const card = screen.getByTestId('place-panel').firstElementChild
+  const panel = screen.getByTestId('place-panel')
+  const card = panel.firstElementChild
+  expect(panel).toHaveClass('pointer-events-none', 'left-1/2', '-translate-x-1/2')
   expect(card).toHaveClass('w-fit', 'text-center')
+  expect(card).not.toHaveClass('pointer-events-auto')
 })
 
 it('keeps a long name inside the tooltip', () => {

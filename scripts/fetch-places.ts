@@ -235,7 +235,7 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
     })
 
     // Every polygon place is discovered as a dot; its footprint stays in the
-    // data and is revealed only when that dot is selected.
+    // data and is revealed only while that dot is hovered.
     if (geomType === 'Polygon' || geomType === 'MultiPolygon') {
       features.push({
         type: 'Feature',

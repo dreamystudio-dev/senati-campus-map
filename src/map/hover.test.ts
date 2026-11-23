@@ -40,6 +40,18 @@ it('copies the hovered feature into the hover source', () => {
   unsubscribe()
 })
 
+it('clears the hover source when the hover ends', () => {
+  const { map, setData } = fakeMap()
+  const unsubscribe = syncHoverSource(map, places)
+
+  useAppStore.getState().setHovered('node/1')
+  setData.mockClear()
+  useAppStore.getState().setHovered(null)
+
+  expect(setData).toHaveBeenCalledWith({ type: 'FeatureCollection', features: [] })
+  unsubscribe()
+})
+
 it('stops syncing after the map is removed', () => {
   const { map, setData } = fakeMap()
   const unsubscribe = syncHoverSource(map, places)

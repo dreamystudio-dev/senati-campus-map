@@ -30,7 +30,7 @@ export function PlacePanel() {
       data-testid="place-panel"
       className="pointer-events-none fixed left-1/2 top-4 z-30 -translate-x-1/2"
     >
-      <div className="pointer-events-auto w-fit min-w-[10rem] max-w-[24rem] rounded-lg border border-white/15 bg-[#12151b]/90 px-4 py-2.5 text-center shadow-xl reduce-blur">
+      <div className="w-fit min-w-[10rem] max-w-[24rem] rounded-lg border border-white/15 bg-[#12151b]/90 px-4 py-2.5 text-center shadow-xl reduce-blur">
         {summary.title && (
           <div className="text-base font-semibold leading-tight text-white">{summary.title}</div>
         )}
