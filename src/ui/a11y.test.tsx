@@ -5,53 +5,40 @@ import { PlacePanel } from './PlacePanel'
 import { useAppStore } from '../store'
 
 beforeEach(() => {
-  useAppStore.setState({
-    selectedId: null,
-    selectedFootprintId: null,
-    hoveredId: null,
-    hoverPosition: null,
-    hiddenCategories: [],
-  })
+  useAppStore.setState({ hoveredId: null, hoverPosition: null, hiddenCategories: [] })
 })
 
-it('closes PlacePanel on Escape and returns focus to map canvas', async () => {
-  const canvas = document.createElement('div')
-  canvas.setAttribute('data-testid', 'map-canvas')
-  canvas.tabIndex = 0
-  document.body.appendChild(canvas)
-
-  useAppStore.getState().select('way/440258367')
-  const { unmount } = render(<PlacePanel />)
-
-  expect(screen.getByRole('dialog')).toBeInTheDocument()
-  await userEvent.keyboard('{Escape}')
-  expect(useAppStore.getState().selectedId).toBeNull()
-  expect(canvas).toHaveFocus()
-
-  unmount()
-  document.body.removeChild(canvas)
-})
-
-it('shows kind once alongside the category chip and measurements', () => {
-  useAppStore.getState().select('way/440258367')
-  render(<PlacePanel />)
-  const card = screen.getByRole('dialog')
-
-  expect(within(card).getByText('office=educational_institution')).toBeInTheDocument()
-  expect(within(card).getAllByText('Education')).toHaveLength(1)
-  expect(within(card).getByText('2 levels')).toBeInTheDocument()
-  expect(within(card).getByText('6.4 m')).toBeInTheDocument()
-})
-
-it('shows a compact hover summary without opening a dialog', () => {
+it('shows the name above the type when a place is hovered', () => {
   useAppStore.getState().setHovered('way/440258367', { x: 100, y: 100 })
   render(<PlacePanel />)
   const panel = screen.getByTestId('place-panel')
 
-  expect(within(panel).queryByRole('dialog')).not.toBeInTheDocument()
   expect(within(panel).getByText('Direccion Zonal Lima Callao')).toBeInTheDocument()
   expect(within(panel).getByText('Education')).toBeInTheDocument()
-  expect(within(panel).queryByText('office=educational_institution')).not.toBeInTheDocument()
+  expect(within(panel).queryByRole('dialog')).not.toBeInTheDocument()
+  expect(within(panel).queryByRole('button')).not.toBeInTheDocument()
+})
+
+it('shows nothing when no place is hovered', () => {
+  render(<PlacePanel />)
+  expect(screen.getByTestId('place-panel').textContent).toBe('')
+})
+
+it('sizes the tooltip to its content and centres it', () => {
+  useAppStore.getState().setHovered('way/440258367', { x: 100, y: 100 })
+  render(<PlacePanel />)
+  const card = screen.getByTestId('place-panel').firstElementChild
+  expect(card).toHaveClass('w-fit', 'text-center')
+})
+
+it('keeps a long name inside the tooltip', () => {
+  useAppStore.getState().setHovered('node/5577057586', { x: 100, y: 100 })
+  render(<PlacePanel />)
+  const panel = screen.getByTestId('place-panel')
+  expect(
+    within(panel).getByText('Institución educativa inicial Querubines Del Divina Misericordia'),
+  ).toBeInTheDocument()
+  expect(panel.firstElementChild).toHaveClass('max-w-[24rem]')
 })
 
 it('toggles category visibility from the legend', async () => {

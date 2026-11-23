@@ -12,10 +12,17 @@ export function syncHoverSource(
   const update = (hoveredId: string | null) => {
     const source = map.getSource(HOVER_SOURCE_ID) as SourceWithData | undefined
     if (!source) return
-    const feature = hoveredId
+    const hovered = hoveredId
       ? places.features.find((f) => f.properties?.id === hoveredId)
       : undefined
-    source.setData({ type: 'FeatureCollection', features: feature ? [feature] : [] })
+    const footprintId = hovered?.properties?.footprintId
+    const footprint = footprintId
+      ? places.features.find((f) => f.properties?.id === footprintId)
+      : undefined
+    const features: FeatureCollection['features'] = []
+    if (hovered) features.push(hovered)
+    if (footprint) features.push(footprint)
+    source.setData({ type: 'FeatureCollection', features })
   }
 
   let previous = useAppStore.getState().hoveredId

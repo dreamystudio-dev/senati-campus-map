@@ -14,14 +14,7 @@ export const INTERACTIVE_LAYER_IDS = ['places-points']
 // Omitting text-font makes MapLibre ask for "Open Sans Regular", which 404s.
 export const BASEMAP_FONT = ['Noto Sans Regular']
 
-const FILL_IDS = CATEGORIES.filter((c) => c.style === 'fill').map((c) => c.id)
-const OUTLINE_IDS = CATEGORIES.filter((c) => c.style === 'outline').map((c) => c.id)
-
-function categoryIn(ids: CategoryId[]): ExpressionSpecification {
-  return ['in', ['get', 'category'], ['literal', ids]] as ExpressionSpecification
-}
-
-function geometryIs(type: 'building' | 'area' | 'point'): ExpressionSpecification {
+function geometryIs(type: 'point'): ExpressionSpecification {
   return ['==', ['get', 'geometryType'], type] as ExpressionSpecification
 }
 
@@ -51,31 +44,8 @@ export function categoryColorExpression(): ExpressionSpecification {
 
 export function layerFilters(
   hiddenCategories: CategoryId[],
-  selectedFootprintId: string | null,
 ): Record<string, FilterSpecification> {
-  const selectedId = selectedFootprintId ?? '__none__'
-  const selected = ['==', ['get', 'id'], selectedId] as FilterSpecification
-
   return {
-    'places-buildings': placeFilter(hiddenCategories, geometryIs('building'), selected),
-    'places-areas-fill': placeFilter(
-      hiddenCategories,
-      geometryIs('area'),
-      categoryIn(FILL_IDS),
-      selected,
-    ),
-    'places-areas-outline-tint': placeFilter(
-      hiddenCategories,
-      geometryIs('area'),
-      categoryIn(OUTLINE_IDS),
-      selected,
-    ),
-    'places-areas-outline': placeFilter(
-      hiddenCategories,
-      geometryIs('area'),
-      categoryIn(OUTLINE_IDS),
-      selected,
-    ),
     'places-points': placeFilter(hiddenCategories, geometryIs('point')),
     'places-hover-fill': placeFilter(hiddenCategories),
     'places-hover-line': placeFilter(hiddenCategories),
@@ -90,9 +60,8 @@ export function layerFilters(
 export function applyLayerFilters(
   map: Pick<Map, 'setFilter'>,
   hiddenCategories: CategoryId[],
-  selectedFootprintId: string | null,
 ): void {
-  const filters = layerFilters(hiddenCategories, selectedFootprintId)
+  const filters = layerFilters(hiddenCategories)
   for (const [id, filter] of Object.entries(filters)) {
     map.setFilter(id, filter)
   }
@@ -100,51 +69,9 @@ export function applyLayerFilters(
 
 export function placesLayers(): LayerSpecification[] {
   const colorExpr = categoryColorExpression()
-  const filters = layerFilters([], null)
+  const filters = layerFilters([])
 
   return [
-    {
-      id: 'places-buildings',
-      type: 'line',
-      source: PLACES_SOURCE_ID,
-      filter: filters['places-buildings'],
-      paint: {
-        'line-color': colorExpr,
-        'line-width': 3,
-        'line-opacity': 0.9,
-      },
-    },
-    {
-      id: 'places-areas-fill',
-      type: 'fill',
-      source: PLACES_SOURCE_ID,
-      filter: filters['places-areas-fill'],
-      paint: {
-        'fill-color': colorExpr,
-        'fill-opacity': 0.3,
-      },
-    },
-    {
-      id: 'places-areas-outline-tint',
-      type: 'fill',
-      source: PLACES_SOURCE_ID,
-      filter: filters['places-areas-outline-tint'],
-      paint: {
-        'fill-color': colorExpr,
-        'fill-opacity': 0.12,
-      },
-    },
-    {
-      id: 'places-areas-outline',
-      type: 'line',
-      source: PLACES_SOURCE_ID,
-      filter: filters['places-areas-outline'],
-      paint: {
-        'line-color': colorExpr,
-        'line-width': 2.5,
-        'line-opacity': 0.9,
-      },
-    },
     {
       id: 'places-points',
       type: 'circle',

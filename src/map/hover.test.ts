@@ -50,3 +50,32 @@ it('stops syncing after the map is removed', () => {
   expect(setData).not.toHaveBeenCalled()
   expect(HOVER_SOURCE_ID).toBe('places-hover')
 })
+
+it('includes the linked footprint polygon when hovering a dot', () => {
+  const withFootprint: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature', id: 'way/1/point',
+        geometry: { type: 'Point', coordinates: [-77.06, -12] },
+        properties: { id: 'way/1/point', footprintId: 'way/1' },
+      },
+      {
+        type: 'Feature', id: 'way/1',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[[-77.06, -12], [-77.059, -12], [-77.059, -11.999], [-77.06, -11.999], [-77.06, -12]]],
+        },
+        properties: { id: 'way/1' },
+      },
+    ],
+  }
+  const { map, setData } = fakeMap()
+  const unsubscribe = syncHoverSource(map, withFootprint)
+  useAppStore.getState().setHovered('way/1/point')
+  expect(setData).toHaveBeenCalledWith({
+    type: 'FeatureCollection',
+    features: [withFootprint.features[0], withFootprint.features[1]],
+  })
+  unsubscribe()
+})

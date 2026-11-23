@@ -7,36 +7,16 @@ beforeEach(() =>
     mapError: null,
     hoveredId: null,
     hoverPosition: null,
-    selectedId: null,
-    selectedFootprintId: null,
     hiddenCategories: [],
   }),
 )
 
-it('selects and clears a place', () => {
-  useAppStore.getState().select('way/1')
-  expect(useAppStore.getState().selectedId).toBe('way/1')
-  useAppStore.getState().select(null)
-  expect(useAppStore.getState().selectedId).toBeNull()
-})
-
-it('tracks the footprint linked to the selected dot', () => {
-  useAppStore.getState().select('way/1/point', 'way/1')
-  expect(useAppStore.getState()).toMatchObject({
-    selectedId: 'way/1/point',
-    selectedFootprintId: 'way/1',
-  })
-  useAppStore.getState().select(null)
-  expect(useAppStore.getState().selectedFootprintId).toBeNull()
-})
-
-it('toggles categories and clears transient place state', () => {
-  useAppStore.getState().select('way/1/point', 'way/1')
+it('toggles categories and clears transient hover state', () => {
   useAppStore.getState().setHovered('way/1/point', { x: 1, y: 2 })
   useAppStore.getState().toggleCategory('shop')
   expect(useAppStore.getState().hiddenCategories).toEqual(['shop'])
-  expect(useAppStore.getState().selectedFootprintId).toBeNull()
   expect(useAppStore.getState().hoveredId).toBeNull()
+  expect(useAppStore.getState().hoverPosition).toBeNull()
   useAppStore.getState().toggleCategory('shop')
   expect(useAppStore.getState().hiddenCategories).toEqual([])
 })

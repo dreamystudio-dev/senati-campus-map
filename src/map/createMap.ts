@@ -56,6 +56,10 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     style,
   })
 
+  if (import.meta.env.DEV) {
+    ;(window as unknown as { __senatiMap?: Map }).__senatiMap = map
+  }
+
   const uninstallRotation = installInvertedRotation(map)
   map.once('remove', uninstallRotation)
 
@@ -121,11 +125,11 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     // and other unrelated store writes do not reapply every filter.
     let lastFilterKey = ''
     const syncFilters = () => {
-      const { hiddenCategories, selectedFootprintId } = useAppStore.getState()
-      const key = `${hiddenCategories.join(',')}|${selectedFootprintId ?? ''}`
+      const { hiddenCategories } = useAppStore.getState()
+      const key = hiddenCategories.join(',')
       if (key === lastFilterKey) return
       lastFilterKey = key
-      applyLayerFilters(map, hiddenCategories, selectedFootprintId)
+      applyLayerFilters(map, hiddenCategories)
     }
     syncFilters()
     const unsubscribeFilters = useAppStore.subscribe(syncFilters)
@@ -154,29 +158,6 @@ export async function createMap(container: HTMLElement): Promise<Map> {
     map.on('mouseout', () => {
       map.getCanvas().style.cursor = ''
       useAppStore.getState().setHovered(null)
-    })
-
-    // Click selection
-    map.on('click', (e: MapMouseEvent) => {
-      const state = useAppStore.getState()
-
-      const bboxSize = 6
-      const bbox: [maplibregl.PointLike, maplibregl.PointLike] = [
-        [e.point.x - bboxSize, e.point.y - bboxSize],
-        [e.point.x + bboxSize, e.point.y + bboxSize],
-      ]
-      const features = map.queryRenderedFeatures(bbox, { layers: INTERACTIVE_LAYER_IDS })
-
-      if (features.length > 0 && features[0].properties?.id) {
-        const footprintId =
-          typeof features[0].properties.footprintId === 'string'
-            ? features[0].properties.footprintId
-            : null
-        state.select(features[0].properties.id, footprintId)
-        return
-      }
-
-      state.select(null)
     })
   })
 
