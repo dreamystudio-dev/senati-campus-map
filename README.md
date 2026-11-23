@@ -6,7 +6,7 @@ A single-screen 3D landing page for the **SENATI Sede Principal** campus in San 
 - **Plus Code:** `2W2Q+89 San Martín de Porres, Peru`
 - **Coordinates:** `[-77.0604, -11.999]` (centre of `src/data/campus.json`)
 
-The map fills the viewport with zero page scrolling. Places are loaded from committed OpenStreetMap GeoJSON data and drawn as flat, category-coloured footprint borders; hovering a markerable place fills it with its own colour at partial opacity. Visitors explore a single always-on 3D campus overview: drag to pan, scroll to zoom, and right-drag (or Ctrl-drag) to rotate and tilt at half the usual sensitivity. There is no controls card.
+The map fills the viewport with zero page scrolling. Places are loaded from committed OpenStreetMap GeoJSON data and drawn as category-coloured dots with labels; buildings are not drawn at rest. Hovering a dot reveals its footprint at 35 % opacity with a thin outline, plus a top-centre tooltip showing the place name and category. Visitors explore a single always-on 3D campus overview: drag to pan, scroll to zoom, and right-drag (or Ctrl-drag) to rotate and tilt at roughly 0.4°/px. The bottom-left category legend is the only controls panel.
 
 ---
 
@@ -70,10 +70,10 @@ out geom;
 > **Note:** The Overpass server may take 30–90 seconds or occasionally rate-limit during peak hours. If it fails, retry after a few moments or pass a local JSON snapshot with `--from-file`.
 
 At build/fetch time, `scripts/fetch-places.ts`:
-1. Resolves OSM tags against the closed category table. Unknown non-building features are dropped.
-2. Derives building heights (`levels * 3.2m`, clamped between 4m and 60m).
-3. Assigns English fallback labels to unnamed areas (*Park*, *Pitch*, *Parking*, *Construction*).
-4. Commits clean GeoJSON in `src/data/places.geojson`.
+1. Resolves OSM tags against the closed eleven-category table. Unknown features are dropped.
+2. Assigns English generic labels only to unnamed park and pitch areas (*Park*, *Pitch*).
+3. Drops any feature with neither an OSM name nor a generic label, so no `Unnamed …` place is ever rendered.
+4. Commits clean GeoJSON in `src/data/places.geojson`. Derived heights (`levels * 3.2m`, clamped to 4–60 m) stay in the data as informational metadata but are not displayed.
 
 ---
 
@@ -81,25 +81,26 @@ At build/fetch time, `scripts/fetch-places.ts`:
 
 `src/categories.ts` is the single source of truth for place categorisation, colors, and render styles.
 
+The eleven categories are education, food, market, shop, park, sport, worship, finance, health, community and entertainment.
+
 Each category defines:
 - `id`: unique `CategoryId` identifier
-- `label`: English display name for tooltips and info cards
+- `label`: English display name for the hover tooltip
 - `color`: hex color code from the fixed design palette
 - `style`: `'fill'` for solid area fills, or `'outline'` for outline/tinted areas
 - `genericLabel` (optional): English fallback label for unnamed areas (e.g. `Park`)
 - `matches`: tag-matching predicate `(tags: Record<string, string>) => boolean`
 
 ### Palette Tokens
-- **Sky (`#5aa9e6`):** Education
+- **Sky (`#5aa9e6`):** Education & Community
 - **Coral (`#ef6f6c`):** Food & Drink
 - **Amber (`#f2b134`):** Market
-- **Violet (`#9b7ede`):** Shop
+- **Violet (`#9b7ede`):** Shop & Entertainment
 - **Lime (`#8bc34a`):** Park & Garden
-- **Teal (`#2ec4b6`):** Sport
+- **Teal (`#2ec4b6`):** Sport & Health
 - **Pink (`#e56b9f`):** Worship
-- **Bone (`#e8e2d6`):** Finance & Art
-- **Orange (`#f08a3c`):** Fuel
-- **Slate (`#6b7a8f`):** Parking & Construction; uncategorised context buildings use dark slate (`#2a303b`)
+- **Bone (`#e8e2d6`):** Finance
+- **Orange (`#f08a3c`) and slate (`#6b7a8f`):** part of the fixed palette, not assigned to a current category
 
 ---
 
@@ -109,22 +110,21 @@ Before deploying or after visual changes, verify the following in a desktop brow
 
 - [ ] **Campus framing:** The overview fits the campus box cleanly on load at 1280×800, 1440×900, and 1920×1080 viewports without page scrollbars.
 - [ ] **Camera controls:**
-  - No controls card is present.
+  - No separate controls card is present; the category legend is the only panel.
   - Right-drag and Ctrl-drag rotate the map in the inverted direction at roughly 0.4°/px; an opposite drag restores the original frame.
   - Vertical drag tilts with the native sign and stops hard at 60°; it cannot go below 0°.
   - Left-drag pans freely in any direction, with no bounds clamp or snap-back.
   - Scrolling out stops at zoom 12; further scrolling does not change the view.
 - [ ] **Resize:** Resizing the window re-fits the single overview, with no page scrollbars at 1280×800, 1440×900 and 1920×1080.
 - [ ] **Feature hover & inspection:**
-  - Categorised buildings render as flat coloured borders with no fill at rest; uncategorised buildings render as dark neutral borders.
-  - Hovering a markerable place shows a pointer cursor, fills it with its own border colour at ~35% opacity, and shows a floating tooltip.
-  - Hovering an uncategorised context building shows no pointer cursor, tooltip or info card.
-  - Clicking a place opens `InfoCard` dialog with category chip, title, metadata, and close button.
-  - Unnamed areas show English generic labels ("Park", "Pitch", "Parking", "Construction"), not blank.
+  - Places render as coloured dots with labels; buildings are not drawn at rest and uncategorised OSM features are dropped at fetch time.
+  - Hovering a dot shows a pointer cursor, reveals its footprint at ~35 % opacity with a thin outline, and shows a top-centre tooltip with the name above the category label. Point-only places show the tooltip and enlarged dot without a polygon.
+  - Clicking a place does nothing: there is no dialog, close button or `Esc` handler. Leaving the dot clears the tooltip and footprint.
+  - Toggling a category in the legend immediately hides its dots and labels and clears any active hover.
+  - No `Unnamed …` place or label appears anywhere; unnamed parks and pitches fall back to *Park* and *Pitch*, named ones keep their OSM name.
   - Every category colour is distinguishable on the dark basemap.
-  - Pressing `Esc` closes `InfoCard` and restores focus to the map canvas.
 - [ ] **Accessibility:**
-  - Keyboard navigation moves focus to the map canvas and the `InfoCard` controls with visible focus rings (`#5aa9e6`).
+  - The tooltip is hover-only with no interactive controls to tab through; the map canvas keeps focus rings (`#5aa9e6`).
 - [ ] **Reduced motion & transparency:**
   - Enabling `prefers-reduced-motion` changes nothing visually now that there are no camera transitions.
   - Enabling `prefers-reduced-transparency` disables backdrop blur filters.
