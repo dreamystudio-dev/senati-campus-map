@@ -1,6 +1,7 @@
 // scripts/fetch-places.test.ts
+import { readFileSync } from 'node:fs'
 import type { Feature, Geometry } from 'geojson'
-import { deriveHeightM, transformOverpass, type PlaceProps } from './fetch-places'
+import { deriveHeightM, PLACES_BBOX, transformOverpass, type PlaceProps } from './fetch-places'
 import sample from './fixtures/overpass-sample.json'
 
 function insidePolygon(point: [number, number], geometry: any): boolean {
@@ -84,4 +85,20 @@ it('puts label points inside their polygons', () => {
   for (const f of fc.features.filter((f: Feature<Geometry, PlaceProps>) => f.properties.geometryType !== 'point')) {
     expect(insidePolygon([f.properties.labelLng, f.properties.labelLat], f.geometry)).toBe(true)
   }
+})
+
+it('fetches a wider box than the campus frame', () => {
+  const [south, west, north, east] = PLACES_BBOX.split(',').map(Number)
+  expect(south).toBeLessThan(-12.003)
+  expect(west).toBeLessThan(-77.065)
+  expect(north).toBeGreaterThan(-11.995)
+  expect(east).toBeGreaterThan(-77.056)
+})
+
+it('commits more real buildings than the original campus-only fetch', () => {
+  const data = JSON.parse(readFileSync('src/data/places.geojson', 'utf8')) as {
+    features: Array<{ properties: { geometryType?: string } }>
+  }
+  const buildings = data.features.filter((f) => f.properties.geometryType === 'building')
+  expect(buildings.length).toBeGreaterThan(120)
 })

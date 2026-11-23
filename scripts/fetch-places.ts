@@ -6,6 +6,8 @@ import polylabel from '@mapbox/polylabel'
 import type { Feature, FeatureCollection, Geometry, Polygon, MultiPolygon, Point, Position } from 'geojson'
 import { resolveCategory, type CategoryId } from '../src/categories'
 
+export const PLACES_BBOX = '-12.00361,-77.06533,-11.99469,-77.05567'
+
 export interface PlaceProps {
   id: string
   name?: string
@@ -180,7 +182,7 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
 }
 
 async function runFetch() {
-  const bbox = '-12.0018,-77.0635,-11.9965,-77.0575'
+  const bbox = PLACES_BBOX
   const query = `[out:json][timeout:90];
 (
   nwr["building"](${bbox});
