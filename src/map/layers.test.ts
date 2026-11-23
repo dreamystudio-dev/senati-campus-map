@@ -1,11 +1,10 @@
 // src/map/layers.test.ts
 import { CATEGORIES } from '../categories'
-import { BASEMAP_FONT, buildingColorExpression, categoryColorExpression, placesLayers } from './layers'
+import { BASEMAP_FONT, categoryColorExpression, placesLayers } from './layers'
 
 const LAYER_IDS = [
   'places-buildings',
-  'places-buildings-outline-volume',
-  'places-buildings-outline',
+  'places-buildings-context',
   'places-areas-fill',
   'places-areas-outline-tint',
   'places-areas-outline',
@@ -25,11 +24,21 @@ it('maps every category colour into the expression', () => {
   for (const c of CATEGORIES) expect(flat).toContain(c.color)
 })
 
-it('varies building lightness by height without losing the palette', () => {
-  const flat = JSON.stringify(buildingColorExpression())
-  expect(flat).toContain('heightM')
-  for (const c of CATEGORIES) expect(flat).toContain(c.color)
-  expect(flat).not.toBe(JSON.stringify(categoryColorExpression()))
+it('renders every building as a flat border, never a filled volume', () => {
+  const layers = placesLayers()
+  expect(layers.some((l) => l.type === 'fill-extrusion')).toBe(false)
+  for (const id of ['places-buildings', 'places-buildings-context']) {
+    expect(layers.find((l) => l.id === id)?.type).toBe('line')
+  }
+})
+
+it('draws context buildings in neutral slate', () => {
+  const layer = placesLayers().find((l) => l.id === 'places-buildings-context') as never as {
+    filter?: unknown
+    paint: { 'line-color': unknown }
+  }
+  expect(layer.paint['line-color']).toBe('#2a303b')
+  expect(JSON.stringify(layer.filter)).toContain('building')
 })
 
 it('splits fills from outlines using the category style', () => {
@@ -64,6 +73,13 @@ it('adds a hover highlight above the place layers', () => {
   const ids = placesLayers().map((l) => l.id)
   expect(ids).toContain('places-hover-fill')
   expect(ids).toContain('places-hover-line')
+})
+
+it('colours hover fills and outlines with the category palette', () => {
+  const flat = JSON.stringify(placesLayers().filter((l) => l.id.startsWith('places-hover')))
+  for (const c of CATEGORIES) expect(flat).toContain(c.color)
+  expect(flat).toContain('0.35')
+  expect(flat).not.toContain('#ffffff')
 })
 
 it('highlights hovered points with a circle layer', () => {
