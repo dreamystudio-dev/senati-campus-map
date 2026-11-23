@@ -5,6 +5,7 @@ import osmtogeojson from 'osmtogeojson'
 import polylabel from '@mapbox/polylabel'
 import type { Feature, FeatureCollection, Geometry, Polygon, MultiPolygon, Point, Position } from 'geojson'
 import { resolveCategory, type CategoryId } from '../src/categories'
+import { CAMPUS } from '../src/map/bounds'
 
 export const PLACES_BBOX = '-12.00361,-77.06533,-11.99469,-77.05567'
 
@@ -81,6 +82,51 @@ function roundCoords(geom: Geometry): Geometry {
   return geom
 }
 
+function ringContains(point: Position, ring: Position[]): boolean {
+  const [x, y] = point
+  let inside = false
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i]
+    const [xj, yj] = ring[j]
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+      inside = !inside
+    }
+  }
+  return inside
+}
+
+function polygonContains(point: Position, polygon: Position[][]): boolean {
+  return ringContains(point, polygon[0]) && !polygon.slice(1).some((hole) => ringContains(point, hole))
+}
+
+function interiorLabelPoint(polygon: Position[][]): Position {
+  for (const precision of [1.0, 0.1, 0.01]) {
+    const candidate = polylabel(polygon, precision)
+    if (polygonContains(candidate, polygon)) return candidate
+  }
+
+  // Concave rings can make polylabel land on a boundary vertex. Search a grid
+  // inside the outer ring for a point that is also outside every hole.
+  const outer = polygon[0]
+  const lngs = outer.map((p) => p[0])
+  const lats = outer.map((p) => p[1])
+  const minLng = Math.min(...lngs)
+  const maxLng = Math.max(...lngs)
+  const minLat = Math.min(...lats)
+  const maxLat = Math.max(...lats)
+  const steps = 32
+  for (let i = 1; i < steps; i++) {
+    for (let j = 1; j < steps; j++) {
+      const candidate: Position = [
+        minLng + ((maxLng - minLng) * i) / steps,
+        minLat + ((maxLat - minLat) * j) / steps,
+      ]
+      if (polygonContains(candidate, polygon)) return candidate
+    }
+  }
+  return outer[0]
+}
+
 export function transformOverpass(osm: unknown): FeatureCollection<Geometry, PlaceProps> {
   const geojson = osmtogeojson(osm) as FeatureCollection<Geometry, Record<string, any>>
   const features: Feature<Geometry, PlaceProps>[] = []
@@ -117,7 +163,7 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
       labelLat = pt[1]
     } else if (geomType === 'Polygon') {
       const poly = feature.geometry as Polygon
-      const [lng, lat] = polylabel(poly.coordinates, 1.0)
+      const [lng, lat] = interiorLabelPoint(poly.coordinates)
       labelLng = lng
       labelLat = lat
     } else if (geomType === 'MultiPolygon') {
@@ -129,7 +175,7 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
           bestPoly = p
         }
       }
-      const [lng, lat] = polylabel(bestPoly, 1.0)
+      const [lng, lat] = interiorLabelPoint(bestPoly)
       labelLng = lng
       labelLat = lat
     } else {
@@ -156,7 +202,7 @@ export function transformOverpass(osm: unknown): FeatureCollection<Geometry, Pla
       props.name = tags.name
     }
     // Unnamed areas need something to render: parks, pitches, parking and
-    // construction sites fall back to their category's generic Spanish label.
+    // construction sites fall back to their category's generic English label.
     if (placeGeometryType === 'area' && category?.genericLabel) {
       props.genericLabel = category.genericLabel
     }
@@ -237,6 +283,15 @@ out geom;`
 
   console.log(`Fetched ${data.elements?.length || 0} elements. Transforming...`)
   const fc = transformOverpass(data)
+
+  // Only nearby buildings and areas are in scope for the wider fetch. POI dots
+  // stay limited to the original campus frame so the marker set does not grow.
+  const [west, south, east, north] = CAMPUS.bounds
+  fc.features = fc.features.filter((feature) => {
+    if (feature.properties.geometryType !== 'point') return true
+    const { labelLng: lng, labelLat: lat } = feature.properties
+    return lng >= west && lng <= east && lat >= south && lat <= north
+  })
 
   const counts: Record<string, number> = {}
   for (const f of fc.features) {

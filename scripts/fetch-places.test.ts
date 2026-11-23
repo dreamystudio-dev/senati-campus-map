@@ -4,18 +4,8 @@ import type { Feature, Geometry } from 'geojson'
 import { deriveHeightM, PLACES_BBOX, transformOverpass, type PlaceProps } from './fetch-places'
 import sample from './fixtures/overpass-sample.json'
 
-function insidePolygon(point: [number, number], geometry: any): boolean {
+function insideRing(point: [number, number], ring: number[][]): boolean {
   const [x, y] = point
-  let rings: number[][][] = []
-  if (geometry.type === 'Polygon') {
-    rings = geometry.coordinates
-  } else if (geometry.type === 'MultiPolygon') {
-    rings = geometry.coordinates[0]
-  } else {
-    return false
-  }
-
-  const ring = rings[0]
   let inside = false
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const xi = ring[i][0]
@@ -27,6 +17,18 @@ function insidePolygon(point: [number, number], geometry: any): boolean {
     if (intersect) inside = !inside
   }
   return inside
+}
+
+function insidePolygon(point: [number, number], geometry: any): boolean {
+  const polygons: number[][][][] =
+    geometry.type === 'Polygon'
+      ? [geometry.coordinates]
+      : geometry.type === 'MultiPolygon'
+        ? geometry.coordinates
+        : []
+  return polygons.some(
+    (rings) => insideRing(point, rings[0]) && !rings.slice(1).some((hole) => insideRing(point, hole)),
+  )
 }
 
 it('derives height from levels, then height, then default', () => {
@@ -80,10 +82,19 @@ it('formats ids as osm type and id, and types each geometry class', () => {
   )
 })
 
-it('puts label points inside their polygons', () => {
+it('puts label points inside their polygons in fixtures and committed data', () => {
   const fc = transformOverpass(sample as never)
   for (const f of fc.features.filter((f: Feature<Geometry, PlaceProps>) => f.properties.geometryType !== 'point')) {
-    expect(insidePolygon([f.properties.labelLng, f.properties.labelLat], f.geometry)).toBe(true)
+    expect(insidePolygon([f.properties.labelLng, f.properties.labelLat], f.geometry), f.properties.id).toBe(true)
+  }
+
+  const committed = JSON.parse(readFileSync('src/data/places.geojson', 'utf8')) as {
+    features: Array<{ geometry: any; properties: PlaceProps }>
+  }
+  for (const f of committed.features.filter(
+    (f) => f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon',
+  )) {
+    expect(insidePolygon([f.properties.labelLng, f.properties.labelLat], f.geometry), f.properties.id).toBe(true)
   }
 })
 
@@ -100,5 +111,33 @@ it('commits more real buildings than the original campus-only fetch', () => {
     features: Array<{ properties: { geometryType?: string } }>
   }
   const buildings = data.features.filter((f) => f.properties.geometryType === 'building')
-  expect(buildings.length).toBeGreaterThan(120)
+  expect(buildings.length).toBeGreaterThan(350)
+})
+
+it('keeps the original sixteen POI dots in the committed data', () => {
+  const data = JSON.parse(readFileSync('src/data/places.geojson', 'utf8')) as {
+    features: Array<{ properties: { id: string; geometryType?: string } }>
+  }
+  const ids = data.features
+    .filter((f) => f.properties.geometryType === 'point')
+    .map((f) => f.properties.id)
+
+  expect(ids).toEqual([
+    'node/1863374473',
+    'node/4379685965',
+    'node/4379685966',
+    'node/4379812240',
+    'node/4379812275',
+    'node/4379812276',
+    'node/5577057586',
+    'node/5577057587',
+    'node/5577057588',
+    'node/5577057589',
+    'node/5577057590',
+    'node/5577057591',
+    'node/9406636346',
+    'node/14361385759',
+    'node/14361385760',
+    'node/14383648668',
+  ])
 })
