@@ -142,7 +142,11 @@ export function placesLayers(): LayerSpecification[] {
       id: 'places-labels',
       type: 'symbol',
       source: PLACES_SOURCE_ID,
-      filter: ['any', ['has', 'name'], ['has', 'genericLabel']] as FilterSpecification,
+      filter: [
+        'all',
+        ['any', ['has', 'name'], ['has', 'genericLabel']],
+        ['!', ['all', geometryIs('building'), ['==', ['get', 'category'], null]]],
+      ] as FilterSpecification,
       layout: {
         'text-field': ['coalesce', ['get', 'name'], ['get', 'genericLabel']],
         'text-font': BASEMAP_FONT,

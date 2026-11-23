@@ -62,6 +62,36 @@ it('separates categorised buildings from category-less context features', () => 
   expect(contextFilter.filter(globals, building('shop'))).toBe(false)
 })
 
+it('does not label named context buildings', () => {
+  const labelLayer = placesLayers().find((l) => l.id === 'places-labels') as never as {
+    filter?: Parameters<typeof featureFilter>[0]
+  }
+  const labelFilter = featureFilter(labelLayer.filter)
+  const globals = { zoom: 15 }
+  const feature = (properties: Record<string, unknown>) =>
+    ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [0, 0] },
+      properties,
+    }) as never
+
+  expect(
+    labelFilter.filter(
+      globals,
+      feature({ geometryType: 'building', category: null, name: 'Anfiteatro' }),
+    ),
+  ).toBe(false)
+  expect(
+    labelFilter.filter(
+      globals,
+      feature({ geometryType: 'building', category: 'education', name: 'Comedor' }),
+    ),
+  ).toBe(true)
+  expect(
+    labelFilter.filter(globals, feature({ geometryType: 'area', genericLabel: 'Park' })),
+  ).toBe(true)
+})
+
 it('splits fills from outlines using the category style', () => {
   const byId = Object.fromEntries(placesLayers().map((l) => [l.id, l])) as Record<
     string,
@@ -96,11 +126,16 @@ it('adds a hover highlight above the place layers', () => {
   expect(ids).toContain('places-hover-line')
 })
 
-it('colours hover fills and outlines with the category palette', () => {
-  const flat = JSON.stringify(placesLayers().filter((l) => l.id.startsWith('places-hover')))
-  for (const c of CATEGORIES) expect(flat).toContain(c.color)
-  expect(flat).toContain('0.35')
-  expect(flat).not.toContain('#ffffff')
+it('pins each hover layer to the category palette and the fill to 35% opacity', () => {
+  const paintOf = (id: string) =>
+    (placesLayers().find((l) => l.id === id) as never as { paint: Record<string, unknown> }).paint
+
+  for (const id of ['places-hover-fill', 'places-hover-line', 'places-hover-point']) {
+    const paint = JSON.stringify(paintOf(id))
+    for (const category of CATEGORIES) expect(paint).toContain(category.color)
+    expect(paint).not.toMatch(/#fff(?:ffff)?\b/i)
+  }
+  expect(paintOf('places-hover-fill')['fill-opacity']).toBe(0.35)
 })
 
 it('highlights hovered points with a circle layer', () => {
