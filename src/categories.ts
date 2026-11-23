@@ -28,7 +28,7 @@ export const CATEGORIES: Category[] = [
     id: 'education',
     label: 'Education',
     color: '#5aa9e6', // sky
-    style: 'fill',
+    style: 'outline',
     matches: (tags) =>
       ['college', 'university', 'school', 'kindergarten'].includes(tags.amenity) ||
       tags.office === 'educational_institution',

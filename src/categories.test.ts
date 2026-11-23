@@ -7,6 +7,10 @@ it('has the twelve spec categories', () => {
   expect(Object.keys(CATEGORY_BY_ID)).toHaveLength(12)
 })
 
+it('draws education areas as a faint outline, not a solid fill', () => {
+  expect(CATEGORY_BY_ID.education.style).toBe('outline')
+})
+
 it.each([
   [{ amenity: 'marketplace' }, 'market'],
   [{ shop: 'car_parts' }, 'shop'],
