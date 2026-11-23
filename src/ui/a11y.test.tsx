@@ -30,12 +30,12 @@ it('closes InfoCard on Escape and returns focus to map canvas', async () => {
 })
 
 it('shows kind once alongside the category chip and measurements', () => {
-  useAppStore.getState().select('relation/21864174')
+  useAppStore.getState().select('way/440258367')
   render(<InfoCard />)
   const card = screen.getByRole('dialog')
 
-  expect(within(card).getByText('building=college')).toBeInTheDocument()
-  expect(within(card).getAllByText('Building')).toHaveLength(1)
+  expect(within(card).getByText('office=educational_institution')).toBeInTheDocument()
+  expect(within(card).getAllByText('Education')).toHaveLength(1)
   expect(within(card).getByText('2 levels')).toBeInTheDocument()
   expect(within(card).getByText('6.4 m')).toBeInTheDocument()
 })

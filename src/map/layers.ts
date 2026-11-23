@@ -3,6 +3,12 @@ import { CATEGORIES, type CategoryId } from '../categories'
 
 export const PLACES_SOURCE_ID = 'places'
 export const HOVER_SOURCE_ID = 'places-hover'
+export const INTERACTIVE_LAYER_IDS = [
+  'places-buildings',
+  'places-areas-fill',
+  'places-areas-outline-tint',
+  'places-points',
+]
 
 // OpenFreeMap's glyph server only hosts the fonts its own styles use.
 // Omitting text-font makes MapLibre ask for "Open Sans Regular", which 404s.

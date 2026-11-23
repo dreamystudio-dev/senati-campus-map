@@ -4,7 +4,7 @@ import type { FeatureCollection } from 'geojson'
 import { sanitizeStyle } from './style'
 import { isFatalMapError } from './errors'
 import { syncHoverSource } from './hover'
-import { PLACES_SOURCE_ID, HOVER_SOURCE_ID, placesLayers } from './layers'
+import { PLACES_SOURCE_ID, HOVER_SOURCE_ID, INTERACTIVE_LAYER_IDS, placesLayers } from './layers'
 import placesData from '../data/places.geojson'
 import { useAppStore } from '../store'
 import { installInvertedRotation } from '../camera/invertRotation'
@@ -101,14 +101,6 @@ export async function createMap(container: HTMLElement): Promise<Map> {
       }
     }
 
-    const interactiveLayerIds = [
-      'places-buildings',
-      'places-buildings-outline-volume',
-      'places-areas-fill',
-      'places-areas-outline-tint',
-      'places-points',
-    ]
-
     for (const layer of placesLayers()) {
       if (!map.getLayer(layer.id)) {
         if (layer.id === 'places-labels') {
@@ -128,7 +120,7 @@ export async function createMap(container: HTMLElement): Promise<Map> {
         [e.point.x - bboxSize, e.point.y - bboxSize],
         [e.point.x + bboxSize, e.point.y + bboxSize],
       ]
-      const features = map.queryRenderedFeatures(bbox, { layers: interactiveLayerIds })
+      const features = map.queryRenderedFeatures(bbox, { layers: INTERACTIVE_LAYER_IDS })
 
       if (features.length > 0 && features[0].properties?.id) {
         map.getCanvas().style.cursor = 'pointer'
@@ -153,7 +145,7 @@ export async function createMap(container: HTMLElement): Promise<Map> {
         [e.point.x - bboxSize, e.point.y - bboxSize],
         [e.point.x + bboxSize, e.point.y + bboxSize],
       ]
-      const features = map.queryRenderedFeatures(bbox, { layers: interactiveLayerIds })
+      const features = map.queryRenderedFeatures(bbox, { layers: INTERACTIVE_LAYER_IDS })
 
       if (features.length > 0 && features[0].properties?.id) {
         state.select(features[0].properties.id)

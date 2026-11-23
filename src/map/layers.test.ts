@@ -1,6 +1,6 @@
 // src/map/layers.test.ts
 import { CATEGORIES } from '../categories'
-import { BASEMAP_FONT, categoryColorExpression, placesLayers } from './layers'
+import { BASEMAP_FONT, categoryColorExpression, INTERACTIVE_LAYER_IDS, placesLayers } from './layers'
 
 const LAYER_IDS = [
   'places-buildings',
@@ -86,4 +86,10 @@ it('highlights hovered points with a circle layer', () => {
   const layer = placesLayers().find((l) => l.id === 'places-hover-point')
   expect(layer?.type).toBe('circle')
   expect(JSON.stringify((layer as { filter?: unknown }).filter)).toContain('point')
+})
+
+it('never treats neutral context buildings as interactive', () => {
+  expect(INTERACTIVE_LAYER_IDS).toContain('places-buildings')
+  expect(INTERACTIVE_LAYER_IDS).not.toContain('places-buildings-context')
+  expect(INTERACTIVE_LAYER_IDS).not.toContain('places-hover-fill')
 })

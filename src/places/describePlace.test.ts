@@ -16,9 +16,11 @@ it('never returns a blank title for an unnamed building', () => {
   expect(describePlace({ ...p }).title).toBe('Unnamed shop')
 })
 
-it('labels neutral context buildings with a null category', () => {
+it('does not invent a type for a category-less feature', () => {
   const p = { ...base, category: null, geometryType: 'building' } as const
-  expect(describePlace({ ...p })).toMatchObject({ title: 'Unnamed building', meta: ['Building'] })
+  const summary = describePlace({ ...p })
+  expect(JSON.stringify(summary)).not.toContain('Unnamed building')
+  expect(JSON.stringify(summary)).not.toContain('Building')
 })
 
 it('reports levels and height when known', () => {
